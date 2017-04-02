@@ -1,0 +1,14 @@
+name: sklearndev1
+dependencies:
+  - python=3
+  - numpy==1.9.3
+  - scipy==0.16.0
+  - cython
+  - jupyter
+  - pandas
+  - pip
+  - pip:
+      - nose-timer
+      - wheelhouse_uploader
+      - nose
+      - Wheel
