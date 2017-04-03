@@ -7,15 +7,19 @@ It will eventually be **deprecated** once the iRF implementation is completed. I
 
 ### Installing the `conda` environments
 
-To start just install the 3 conda environments using the `Makefile` as follows:
+Firstly you need to [install Anaconda](https://www.continuum.io/downloads) on your computer
 
-To create all 3 environments use:
+First fork and then clone the repo locally on your computer. Change directory to the repo folder.
+
+To install the 3 conda environments just use the `Makefile` as shown below.
+
+To create **all 3 environments** use:
 
 ```
 make conda_all
 ```
 
-Or to install them individually you can run the following commands separately
+Or to install them **individually** you can run the following commands separately
 
 ```
 make conda_dev0

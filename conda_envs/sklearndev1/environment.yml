@@ -1,14 +1,18 @@
 name: sklearndev1
 dependencies:
   - python=3
-  - numpy==1.9.3
-  - scipy==0.16.0
   - cython
-  - jupyter
-  - pandas
+  - graphviz
   - pip
   - pip:
       - nose-timer
       - wheelhouse_uploader
       - nose
       - Wheel
+      - numpy==1.9.3
+      - scipy==0.16.0
+      - jupyter
+      - pandas
+      - matplotlib
+      - pillow
+      - graphviz
