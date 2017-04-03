@@ -15,21 +15,30 @@ To install the 3 conda environments just use the `Makefile` as shown below.
 
 To create **all 3 environments** use:
 
-```
+```bash
 make conda_all
 ```
 
 Or to install them **individually** you can run the following commands separately
 
-```
+```bash
 make conda_dev0
 make conda_dev1
 make conda_prod0
 ```
 
+To confirm that the conda environments have installed correctly you can run the following in the terminal:
+```bash
+conda info -e
+```
+
+You should now see the 3 installed environments listed as required `sklearndev0`, `sklearndev1` and `sklearnprod0`.
+
+To **activate** the conda environments simply use conda as usual i.e. `source activate sklearndev0`
+
 ### Quick info on each of the conda environments
 
-`sklearndev0` : Is built to [scikit learn dev requirements.txt](https://github.com/scikit-learn/scikit-learn/blob/master/build_tools/appveyor/requirements.txt). Useful for our scikit-learn development.
+`sklearndev0` : Is built to mirror [scikit learn dev requirements.txt](https://github.com/scikit-learn/scikit-learn/blob/master/build_tools/appveyor/requirements.txt). Useful for our scikit-learn development.
 
 `sklearndev1` : Same as `sklearndev0` but includes pandas and jupyter notebook for additional interactive testing
 

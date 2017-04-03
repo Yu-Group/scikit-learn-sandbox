@@ -3,14 +3,14 @@ dependencies:
   - python=3
   - cython
   - graphviz
+  - numpy==1.9.3
+  - scipy==0.16.0
   - pip
   - pip:
       - nose-timer
       - wheelhouse_uploader
       - nose
       - Wheel
-      - numpy==1.9.3
-      - scipy==0.16.0
       - jupyter
       - pandas
       - matplotlib
