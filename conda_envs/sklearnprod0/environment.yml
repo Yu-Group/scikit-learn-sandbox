@@ -1,15 +1,19 @@
 name: sklearnprod0
 dependencies:
   - python=3
-  - scikit-learn
-  - numpy
-  - scipy
   - cython
-  - jupyter
-  - pandas
+  - graphviz
   - pip
   - pip:
       - nose-timer
       - wheelhouse_uploader
       - nose
       - Wheel
+      - numpy
+      - scipy
+      - graphviz
+      - jupyter
+      - pandas
+      - matplotlib
+      - pillow
+      - graphviz

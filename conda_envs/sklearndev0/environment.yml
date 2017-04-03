@@ -1,9 +1,9 @@
 name: sklearndev0
 dependencies:
   - python=3
+  - cython
   - numpy==1.9.3
   - scipy==0.16.0
-  - cython
   - pip
   - pip:
       - nose-timer
