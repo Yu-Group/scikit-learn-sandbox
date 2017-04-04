@@ -2,6 +2,7 @@ name: sklearnprod0
 dependencies:
   - python=3
   - cython
+  - scikit-learn
   - graphviz
   - pip
   - pip:
