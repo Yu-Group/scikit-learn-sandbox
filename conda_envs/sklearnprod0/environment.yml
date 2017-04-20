@@ -18,3 +18,4 @@ dependencies:
       - matplotlib
       - pillow
       - graphviz
+      - pydotplus

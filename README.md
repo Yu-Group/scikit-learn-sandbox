@@ -34,7 +34,7 @@ conda info -e
 
 You should now see the 3 installed environments listed as required `sklearndev0`, `sklearndev1` and `sklearnprod0`.
 
-To **activate** the conda environments simply use conda as usual i.e. `source activate sklearnprod0`
+To **activate** the conda environments simply use conda as usual i.e. `source activate sklearndev0`
 
 ### Quick info on each of the conda environments
 
@@ -73,14 +73,14 @@ The typical workflow is as follows:
 
 1. [Create](https://github.com/Yu-Group/scikit-learn-sandbox/issues) a **github issue** for every task e.g. [example](https://github.com/Yu-Group/scikit-learn-sandbox/issues/19).
 
-Add as many helpful links and details as possible. This is our main form of assigned work documentation - so use judgement on what to include. Typically I begin each issue with "FIX:" e.g.:
+* Add as many helpful links and details as possible.
+* This is our main form of assigned work documentation - so use judgement on what to include.
+* Typically I begin each issue with "FIX:"
 
-**FIX: Explore Binary Tree Traversal**
-*Insert Issue details here*
+e.g. **FIX: Explore Binary Tree Traversal** *Insert Issue details here*
 
 2. Assign a person to the issue e.g. shamindras, kkumbier etc
-3. Activate the conda environment i.e. `source activate sklearnprod0`
-4. Locally update master i.e.:
+3. Locally update master i.e.:
 
 ```bash
 git checkout master
