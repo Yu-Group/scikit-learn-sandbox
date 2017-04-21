@@ -3319,12 +3319,14 @@ def draw_tree(inp_tree
               , out_file = None
               , filled=True
               , rounded=True
-              , special_characters=True):
+              , special_characters=True
+              , node_ids=True):
     dot_data = tree.export_graphviz(inp_tree
                                     , out_file = out_file
                                     , filled   = filled
                                     , rounded  = rounded
-                                    , special_characters = special_characters)
+                                    , special_characters = special_characters
+                                    , node_ids=node_ids)
     graph = pydotplus.graph_from_dot_data(dot_data)
     img = Image(graph.create_png())
     display(img)
