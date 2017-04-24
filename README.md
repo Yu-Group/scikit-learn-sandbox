@@ -91,6 +91,7 @@ git push -f origin master # update origin master
 5. Create a **new branch** for the issue: `git checkout -b issue-**issue-number**-**short-description**`
 
 e.g. `issue-17-binary-tree-traverse` is one such typical branch name. Note you are now checked into the new branch and ready to go!
+
 6. Do your great coding here :). Commit regularly with helpful messages e.g.:
 
 *FIX: Issue #15, create first draft of all features in decision path to the leaf node predicted leaf node values and depth of the leaf node*
