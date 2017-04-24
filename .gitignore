@@ -91,3 +91,6 @@ ENV/
 
 # Mac
 .DS_Store
+
+# emacs
+jupyter/utils/.#utils.py
