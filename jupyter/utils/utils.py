@@ -2,29 +2,47 @@
 
 # The following is used to draw the random forest decision tree
 # graph and display it interactively in the jupyter notebook
-from sklearn import tree
 import pydotplus
 import numpy as np
+import pprint
+from sklearn import metrics
+from sklearn import tree
 from sklearn.tree import _tree
 from IPython.display import display, Image
-import pprint
 
-def draw_tree(inp_tree
+def draw_tree(decision_tree
               , out_file = None
-              , filled=True
-              , rounded=True
-              , special_characters=True
-              , node_ids=True):
+              , filled = True
+              , rounded = False
+              , special_characters = True
+              , node_ids = True
+              , max_depth = None
+              , feature_names = None
+              , class_names = None
+              , label = 'all'
+              , leaves_parallel = False
+              , impurity = True
+              , proportion = False
+              , rotate = False):
+
     """This will visually display the decision tree in the jupyter notebook
-       This is useful for validation purposes of the key metrics collected
-       from the decision tree object
-    """
-    dot_data = tree.export_graphviz(inp_tree
+                        This is useful for validation purposes of the key metrics collected
+                        from the decision tree object
+                        """
+    dot_data = tree.export_graphviz(decision_tree = decision_tree
                                     , out_file = out_file
-                                    , filled   = filled
-                                    , rounded  = rounded
+                                    , filled = filled
+                                    , rounded = rounded
                                     , special_characters = special_characters
-                                    , node_ids=node_ids)
+                                    , node_ids = node_ids
+                                    , max_depth = max_depth
+                                    , feature_names = feature_names
+                                    , class_names = class_names
+                                    , label = label
+                                    , leaves_parallel = leaves_parallel
+                                    , impurity = impurity
+                                    , proportion = proportion
+                                    , rotate = rotate)
     graph = pydotplus.graph_from_dot_data(dot_data)
     img = Image(graph.create_png())
     display(img)
@@ -46,16 +64,104 @@ def allTreePaths(dtree, root_node_id = 0):
 
     # if left/right is None we'll get empty list anyway
     if children_left[root_node_id] != _tree.TREE_LEAF:
-        paths = [np.append(root_node_id, l) for l in allTreePaths(dtree, children_left[root_node_id]) + allTreePaths(dtree, children_right[root_node_id])]
+        paths = [np.append(root_node_id, l)
+                 for l in allTreePaths(dtree, children_left[root_node_id]) +
+                          allTreePaths(dtree, children_right[root_node_id])]
 
     else:
         paths = [root_node_id]
     return paths
 
+
+def getValidationMetrics(inp_class_reg_obj, y_true, X_test):
+    """ Get the various Random Forest/ Decision Tree metrics
+        This is currently setup only for classification forests and trees
+        TODO/ CHECK: We need to update this for regression purposes later
+        TODO/ CHECK: We need validation for the input object being a forest
+               or tree classifier/ regression object
+        TODO/ CHECK: For classification we need to validate that the maximum number of
+               labels is 2 for the training/ testing data
+    """
+
+    # Get the predicted values on the validation data
+    y_pred = inp_class_reg_obj.predict(X = X_test)
+
+    ### CLASSIFICATION metrics calculations
+
+    # Compute the F1 score, also known as balanced F-score or F-measure
+    # metrics.f1_score(y_true = y_true, y_pred = y_pred)
+
+    # Compute the average Hamming loss.
+    # metrics.hamming_loss(y_true = y_true, y_pred = y_pred)
+
+    # Jaccard similarity coefficient score
+    # metrics.jaccard_similarity_score(y_true = y_true, y_pred = y_pred)
+
+    # Log loss, aka logistic loss or cross-entropy loss.
+    # metrics.log_loss(y_true = y_true, y_pred = y_pred)
+
+    # Compute the precision
+    # metrics.precision_score(y_true = y_true, y_pred = y_pred)
+
+    # Compute the recall
+    #metrics.recall_score(y_true = y_true, y_pred = y_pred)
+
+    # Cohen’s kappa: a statistic that measures inter-annotator agreement.
+    #metrics.cohen_kappa_score(y1, y2[, labels, ...])
+
+    # Compute Area Under the Curve (AUC) using the trapezoidal rule
+    #metrics.auc(x, y[, reorder])
+
+    # Compute average precision (AP) from prediction scores
+    #metrics.average_precision_score(y_true = y_true, y_score)
+
+    # Compute the Brier score.
+    #metrics.brier_score_loss(y_true = y_true, y_prob[, ...])
+
+    # Compute the F-beta score
+    #metrics.fbeta_score(y_true = y_true, y_pred = y_pred, beta[, ...])
+
+    # Average hinge loss (non-regularized)
+    #metrics.hinge_loss(y_true = y_true, pred_decision[, ...])
+
+    # Compute the Matthews correlation coefficient (MCC) for binary classes
+    #metrics.matthews_corrcoef(y_true = y_true, y_pred[, ...])
+
+    # Compute precision-recall pairs for different probability thresholds
+    #metrics.precision_recall_curve(y_true = y_true, ...)
+
+    # Compute precision, recall, F-measure and support for each class
+    #metrics.precision_recall_fscore_support(...)
+
+    # Compute Area Under the Curve (AUC) from prediction scores
+    #metrics.roc_auc_score(y_true = y_true, y_score[, ...])
+
+    # Compute Receiver operating characteristic (ROC)
+    #metrics.roc_curve(y_true = y_true, y_score[, ...])
+
+    # Accuracy classification score
+    accuracy_score = metrics.accuracy_score(y_true = y_true, y_pred = y_pred)
+
+    # Build a text report showing the main classification metrics
+    classification_report = metrics.classification_report(y_true = y_true, y_pred = y_pred)
+
+    # Compute confusion matrix to evaluate the accuracy of a classification
+    confusion_matrix = metrics.confusion_matrix(y_true = y_true, y_pred = y_pred)
+
+    # Zero-one classification loss.
+    zero_one_loss = metrics.zero_one_loss(y_true = y_true, y_pred = y_pred)
+
+
+    classification_metrics = {"accuracy_score" : accuracy_score,
+                              "classification_report" : classification_report,
+                              "confusion_matrix" : confusion_matrix,
+                              "zero_one_loss" : zero_one_loss}
+    return classification_metrics
+
 def getTreeData(X_train, dtree, root_node_id = 0):
     """This returns all of the required summary results from an
-        individual decision tree
-        """
+            individual decision tree
+            """
 
     max_node_depth  = dtree.tree_.max_depth
     n_nodes         = dtree.tree_.node_count
@@ -109,29 +215,11 @@ def getTreeData(X_train, dtree, root_node_id = 0):
     # CHECK: Why does the leaf node have a feature associated with it? Investigate further
     # Removed the final leaf node value so that this feature does not get included currently
     all_leaf_paths_features = [node_features_idx[path[:-1]] for path in all_leaf_node_paths]
-    #print(all_features_idx)
-    #print(np.array(range(tot_num_features))[all_features_idx])
-    #print(np.array(node_features_raw_idx)[all_features_idx])
-    #print(np.array(node_features_raw_idx))
-    #print(all_features_idx[np.array(node_features_raw_idx)])
-    #print(node_features_idx)
-    #print(all_leaf_node_paths)
 
     # Get the unique list of features along a path
     # NOTE: This removes the original ordering of the features along the path
     # The original ordering could be preserved using a special function but will increase runtime
     all_uniq_leaf_paths_features = [np.unique(feature_path) for feature_path in all_leaf_paths_features]
-
-    #print("number of node features", num_features_used, sep = ":\n")
-    #print("node feature indices", node_features_idx, sep = ":\n")
-    #print("Max node depth in tree", max_node_depth, sep = ":\n")
-    #print("number of nodes in tree", n_nodes, sep = ":\n")
-    #print("all leaf node depths", leaf_nodes_depths, sep = ":\n")
-    #print("all leaf node predicted values", all_leaf_node_values, sep = ":\n")
-    #print("total leaf node predicted values", tot_leaf_node_values, sep = ":\n")
-    #print("all leaf node predicted classes", all_leaf_node_classes, sep = ":\n")
-    #print("all features in leaf node paths", all_leaf_paths_features, sep = ":\n")
-    #print("all unique features in leaf node paths", all_uniq_leaf_paths_features, sep = ":\n")
 
     # Dictionary of all tree values
     tree_data = {"num_features_used" : num_features_used,

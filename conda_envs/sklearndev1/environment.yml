@@ -1,4 +1,7 @@
 name: sklearndev1
+channels:
+  - conda-forge
+  - defaults
 dependencies:
   - python=3
   - cython
@@ -6,9 +9,12 @@ dependencies:
   - numpy==1.9.3
   - scipy==0.16.0
   - pip
+  - jupyter_contrib_nbextensions
+  - pandas
   - pip:
       - nose-timer
       - wheelhouse_uploader
+      - yapf
       - nose
       - Wheel
       - jupyter
