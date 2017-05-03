@@ -7,8 +7,41 @@ import numpy as np
 import pprint
 from sklearn import metrics
 from sklearn import tree
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import tree
 from sklearn.tree import _tree
 from IPython.display import display, Image
+from sklearn.datasets import load_iris
+from sklearn.datasets import load_breast_cancer
+
+def generate_rf_example(sklearn_ds = load_breast_cancer()
+                        , train_split_propn = 0.7
+                        , n_estimators = 10
+                        , random_state_split = 2017
+                        , random_state_classifier = 2018):
+    """ This fits a random forest classifier to the breast cancer/ iris datasets
+        This can be called from the jupyter notebook so that analysis
+        can take place quickly
+    """
+
+    # Load the relevant scikit learn data
+    raw_data = sklearn_ds
+
+    # Create the train-test datasets
+    X_train, X_test, y_train, y_test = train_test_split(raw_data.data
+                                                        , raw_data.target
+                                                        , train_size = train_split_propn
+                                                        , random_state = random_state_split)
+
+    # Just fit a simple random forest classifier with 2 decision trees
+    rf = RandomForestClassifier(n_estimators = n_estimators
+                                , random_state = random_state_classifier)
+
+    # fit the classifier
+    rf.fit(X = X_train, y = y_train)
+
+    return X_train, X_test, y_train, y_test, rf
 
 def draw_tree(decision_tree
               , out_file = None
@@ -26,9 +59,9 @@ def draw_tree(decision_tree
               , rotate = False):
 
     """This will visually display the decision tree in the jupyter notebook
-                        This is useful for validation purposes of the key metrics collected
-                        from the decision tree object
-                        """
+       This is useful for validation purposes of the key metrics collected
+       from the decision tree object
+    """
     dot_data = tree.export_graphviz(decision_tree = decision_tree
                                     , out_file = out_file
                                     , filled = filled
@@ -88,32 +121,15 @@ def getValidationMetrics(inp_class_reg_obj, y_true, X_test):
 
     ### CLASSIFICATION metrics calculations
 
-    # Compute the F1 score, also known as balanced F-score or F-measure
-    # metrics.f1_score(y_true = y_true, y_pred = y_pred)
-
-    # Compute the average Hamming loss.
-    # metrics.hamming_loss(y_true = y_true, y_pred = y_pred)
-
-    # Jaccard similarity coefficient score
-    # metrics.jaccard_similarity_score(y_true = y_true, y_pred = y_pred)
-
-    # Log loss, aka logistic loss or cross-entropy loss.
-    # metrics.log_loss(y_true = y_true, y_pred = y_pred)
-
-    # Compute the precision
-    # metrics.precision_score(y_true = y_true, y_pred = y_pred)
-
-    # Compute the recall
-    #metrics.recall_score(y_true = y_true, y_pred = y_pred)
-
     # Cohen’s kappa: a statistic that measures inter-annotator agreement.
-    #metrics.cohen_kappa_score(y1, y2[, labels, ...])
+    #cohen_kappa_score = metrics.cohen_kappa_score(y1, y2[, labels, ...])
 
     # Compute Area Under the Curve (AUC) using the trapezoidal rule
-    #metrics.auc(x, y[, reorder])
+    #fpr, tpr, thresholds = metrics.roc_curve(y_true = y_true, y_pred = y_pred)
+    #auc = metrics.auc(fpr, tpr)
 
     # Compute average precision (AP) from prediction scores
-    #metrics.average_precision_score(y_true = y_true, y_score)
+    #average_precision_score = metrics.average_precision_score(y_true = y_true, y_score)
 
     # Compute the Brier score.
     #metrics.brier_score_loss(y_true = y_true, y_prob[, ...])
@@ -139,6 +155,24 @@ def getValidationMetrics(inp_class_reg_obj, y_true, X_test):
     # Compute Receiver operating characteristic (ROC)
     #metrics.roc_curve(y_true = y_true, y_score[, ...])
 
+    # Compute the F1 score, also known as balanced F-score or F-measure
+    f1_score = metrics.f1_score(y_true = y_true, y_pred = y_pred)
+
+    # Compute the average Hamming loss.
+    hamming_loss = metrics.hamming_loss(y_true = y_true, y_pred = y_pred)
+
+    # Jaccard similarity coefficient score
+    jaccard_similarity_score = metrics.jaccard_similarity_score(y_true = y_true, y_pred = y_pred)
+
+    # Log loss, aka logistic loss or cross-entropy loss.
+    log_loss = metrics.log_loss(y_true = y_true, y_pred = y_pred)
+
+    # Compute the precision
+    precision_score = metrics.precision_score(y_true = y_true, y_pred = y_pred)
+
+    # Compute the recall
+    recall_score = metrics.recall_score(y_true = y_true, y_pred = y_pred)
+
     # Accuracy classification score
     accuracy_score = metrics.accuracy_score(y_true = y_true, y_pred = y_pred)
 
@@ -151,17 +185,23 @@ def getValidationMetrics(inp_class_reg_obj, y_true, X_test):
     # Zero-one classification loss.
     zero_one_loss = metrics.zero_one_loss(y_true = y_true, y_pred = y_pred)
 
-
-    classification_metrics = {"accuracy_score" : accuracy_score,
+    # Load all metrics into a single dictionary
+    classification_metrics = {"hamming_loss" : hamming_loss,
+                              "log_loss" : log_loss,
+                              "recall_score" : recall_score,
+                              "precision_score" : precision_score,
+                              "accuracy_score" : accuracy_score,
+                              "f1_score" : f1_score,
                               "classification_report" : classification_report,
                               "confusion_matrix" : confusion_matrix,
                               "zero_one_loss" : zero_one_loss}
+
     return classification_metrics
 
 def getTreeData(X_train, dtree, root_node_id = 0):
     """This returns all of the required summary results from an
-            individual decision tree
-            """
+       individual decision tree
+    """
 
     max_node_depth  = dtree.tree_.max_depth
     n_nodes         = dtree.tree_.node_count
@@ -185,7 +225,6 @@ def getTreeData(X_train, dtree, root_node_id = 0):
     # Start with a range over the total number of features and
     # subset the relevant indices from the raw indices array
     node_features_idx = all_features_idx[np.array(node_features_raw_idx)]
-    #np.array(range(tot_num_features))[all_features_idx]
 
     # Count the unique number of features used
     num_features_used = (np.unique(node_features_idx)).shape[0]

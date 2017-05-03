@@ -94,3 +94,6 @@ ENV/
 
 # emacs
 jupyter/utils/.#utils.py
+
+# utils.py
+jupyter/utils/#*
