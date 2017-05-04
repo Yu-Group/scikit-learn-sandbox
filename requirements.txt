@@ -1,5 +1,5 @@
-numpy==1.9.3
-scipy==0.16.0
+numpy
+scipy
 cython
 scikit-learn
 graphviz
