@@ -6,4 +6,5 @@ pip
 pandas
 wheel
 wheelhouse_uploader
+pydotplus
 pillow
