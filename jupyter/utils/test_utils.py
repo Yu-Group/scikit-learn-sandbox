@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from . import utils
+from . import irf_utils
 import nose
 import pydotplus
 import numpy as np
