@@ -1,0 +1,11 @@
+numpy
+scipy
+cython
+scikit-learn
+pip
+pandas
+wheel
+wheelhouse_uploader
+pydotplus
+pillow
+jupyter

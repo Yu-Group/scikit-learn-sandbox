@@ -1,0 +1,15 @@
+dist: trusty
+sudo: false
+language: python
+python:
+  - 3.6
+cache: pip
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements-test.txt
+  - pip install coverage
+  - pip install coveralls
+script:
+  - nosetests -v --with-coverage --cover-tests ./jupyter/utils/test_utils.py
+after_success:
+  - coveralls
