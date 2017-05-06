@@ -10,6 +10,6 @@ install:
   - pip install coverage
   - pip install coveralls
 script:
-  - nosetests -v --with-coverage --cover-tests ./jupyter/utils/test_utils.py
+  - nosetests -v --with-coverage --cover-tests ./jupyter/utils/test_irf_utils.py
 after_success:
   - coveralls
