@@ -9,3 +9,5 @@ wheelhouse_uploader
 pydotplus
 pillow
 jupyter
+flake8
+autopep8

@@ -26,3 +26,5 @@ dependencies:
       - graphviz
       - pydotplus
       - jupyterthemes
+      - flake8
+      - autopep8
