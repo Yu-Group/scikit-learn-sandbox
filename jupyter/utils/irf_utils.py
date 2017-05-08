@@ -7,8 +7,57 @@ from sklearn.tree import _tree
 
 
 def allTreePaths(dtree, root_node_id=0):
-    """Get all the individual tree paths from root node
-       to the leaves
+    """
+    Get all the individual tree paths from root node to the leaves
+    for a decision tree classifier object [1]_.
+
+    Parameters
+    ----------
+    dtree : DecisionTreeClassifier object
+        An individual decision tree classifier object generated from a
+        fitted RandomForestClassifier object in scikit learn.
+
+    root_node_id : int, optional (default=0)
+        The index of the root node of the tree. Should be set as default to
+        0 and not changed by the user
+
+    Returns
+    -------
+    paths : list
+        Return a list containing 1d numpy arrays of the node paths
+        taken from the root node to the leaf in the decsion tree
+        classifier. There is an individual array for each
+        leaf node in the decision tree.
+
+    Notes
+    -----
+        To obtain a deterministic behaviour during fitting,
+        ``random_state`` has to be fixed.
+
+    References
+    ----------
+        .. [1] https://en.wikipedia.org/wiki/Decision_tree_learning
+
+    Examples
+    --------
+    >>> from sklearn.datasets import load_breast_cancer
+    >>> from sklearn.model_selection import train_test_split
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> raw_data = load_breast_cancer()
+    >>> X_train, X_test, y_train, y_test = train_test_split(
+        raw_data.data, raw_data.target, train_size=0.9,
+        random_state=2017)
+    >>> rf = RandomForestClassifier(
+        n_estimators=3, random_state=random_state_classifier)
+    >>> rf.fit(X=X_train, y=y_train)
+    >>> estimator0 = rf.estimators_[0]
+    >>> tree_dat0 = irf_utils.getTreeData(X_train = X_train,
+                                          dtree = estimator0,
+                                          root_node_id = 0)
+    >>> tree_dat0['all_leaf_node_classes']
+    ...                             # doctest: +SKIP
+    ...
+    [1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0]
     """
 
     # Use these lists to parse the tree structure
@@ -33,15 +82,74 @@ def allTreePaths(dtree, root_node_id=0):
 
 
 def getValidationMetrics(inp_class_reg_obj, y_true, X_test):
-    """ Get the various Random Forest/ Decision Tree metrics
-        This is currently setup only for classification forests and trees
+    """
+    Get the various Random Forest/ Decision Tree metrics
+    This is currently setup only for classification forests and trees
         TODO/ CHECK: We need to update this for regression purposes later
-        TODO/ CHECK: We need validation for the input object being a forest
-               or tree classifier/ regression object
         TODO/ CHECK: For classification we need to validate that
                the maximum number of
                labels is 2 for the training/ testing data
+
+    Get all the individual tree paths from root node to the leaves
+    for a decision tree classifier object [1]_.
+
+    Parameters
+    ----------
+    inp_class_reg_obj : DecisionTreeClassifier or RandomForestClassifier
+        object [1]_
+        An individual decision tree or random forest classifier
+        object generated from a fitted Classifier object in scikit learn.
+
+    y_true : 1d array-like, or label indicator array / sparse matrix
+        Ground truth (correct) target values.
+
+    y_pred : 1d array-like, or label indicator array / sparse matrix
+        Estimated targets as returned by a classifier.
+
+    Returns
+    -------
+    classification_metrics : dict
+        Return a dictionary containing various validation metrics on
+        the input fitted Classifier object
+
+    References
+    ----------
+        .. [1] https://en.wikipedia.org/wiki/Decision_tree_learning
+
+    Examples
+    --------
+    >>> from sklearn.datasets import load_breast_cancer
+    >>> from sklearn.model_selection import train_test_split
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> raw_data = load_breast_cancer()
+    >>> X_train, X_test, y_train, y_test = train_test_split(
+        raw_data.data, raw_data.target, train_size=0.9,
+        random_state=2017)
+    >>> rf = RandomForestClassifier(
+        n_estimators=3, random_state=random_state_classifier)
+    >>> rf.fit(X=X_train, y=y_train)
+    >>> rf_metrics = getValidationMetrics(inp_class_reg_obj = rf,
+                                          y_true = y_test,
+                                          X_test = X_test)
+    >>> rf_metrics['confusion_matrix']
+
+    ...                             # doctest: +SKIP
+    ...
+    array([[12,  2],
+          [ 1, 42]])
     """
+
+    # If the object is not a scikit learn classifier then let user know
+    if type(inp_class_reg_obj).__name__ not in \
+       ["DecisionTreeClassifier", "RandomForestClassifier"]:
+        raise TypeError("input needs to be a DecisionTreeClassifier object, \
+        you have input a {} object".format(type(inp_class_reg_obj)))
+
+    # if the number of classes is not binary let the user know accordingly
+    if inp_class_reg_obj.n_classes_ != 2:
+        raise ValueError("The number of classes for classification must \
+        be binary, you currently have fit to {} \
+        classes".format(inp_class_reg_obj.n_classes_))
 
     # Get the predicted values on the validation data
     y_pred = inp_class_reg_obj.predict(X=X_test)
@@ -84,15 +192,15 @@ def getValidationMetrics(inp_class_reg_obj, y_true, X_test):
     # Compute Receiver operating characteristic (ROC)
     # metrics.roc_curve(y_true = y_true, y_score[, ...])
 
+    # Jaccard similarity coefficient score
+    # jaccard_similarity_score =
+    # metrics.jaccard_similarity_score(y_true = y_true, y_pred = y_pred)
+
     # Compute the F1 score, also known as balanced F-score or F-measure
     f1_score = metrics.f1_score(y_true=y_true, y_pred=y_pred)
 
     # Compute the average Hamming loss.
     hamming_loss = metrics.hamming_loss(y_true=y_true, y_pred=y_pred)
-
-    # Jaccard similarity coefficient score
-    # jaccard_similarity_score =
-    # metrics.jaccard_similarity_score(y_true = y_true, y_pred = y_pred)
 
     # Log loss, aka logistic loss or cross-entropy loss.
     log_loss = metrics.log_loss(y_true=y_true, y_pred=y_pred)
@@ -138,6 +246,8 @@ def getTreeData(X_train, dtree, root_node_id=0):
     max_node_depth = dtree.tree_.max_depth
     n_nodes = dtree.tree_.node_count
     value = dtree.tree_.value
+    n_node_samples = dtree.tree_.n_node_samples
+    root_n_node_samples = float(dtree.tree_.n_node_samples[0])
 
     # Get the total number of features in the training data
     tot_num_features = X_train.shape[1]
@@ -162,19 +272,29 @@ def getTreeData(X_train, dtree, root_node_id=0):
     num_features_used = (np.unique(node_features_idx)).shape[0]
 
     # Get all of the paths used in the tree
-    all_leaf_node_paths = allTreePaths(dtree=dtree, root_node_id=root_node_id)
+    all_leaf_node_paths = allTreePaths(dtree=dtree,
+                                       root_node_id=root_node_id)
 
     # Get list of leaf nodes
     # In all paths it is the final node value
     all_leaf_nodes = [path[-1] for path in all_leaf_node_paths]
 
-    # Final number of training samples predicted in each class at each leaf
-    # node
+    # Get the total number of training samples used in each leaf node
+    all_leaf_node_samples = [n_node_samples[node_id].astype(int)
+                             for node_id in all_leaf_nodes]
+
+    # Get proportion of training samples used in each leaf node
+    # compared to the training samples used in the root node
+    all_leaf_node_samples_percent = [
+        100. * n_leaf_node_samples / root_n_node_samples
+        for n_leaf_node_samples in all_leaf_node_samples]
+
+    # Final predicted values in each class at each leaf node
     all_leaf_node_values = [value[node_id].astype(
         int) for node_id in all_leaf_nodes]
 
-    # Total number of training samples predicted in each class at each leaf
-    # node
+    # Total number of training samples used in the prediction of
+    # each class at each leaf node
     tot_leaf_node_values = [np.sum(leaf_node_values)
                             for leaf_node_values in all_leaf_node_values]
 
@@ -211,6 +331,9 @@ def getTreeData(X_train, dtree, root_node_id=0):
                  "all_leaf_node_paths": all_leaf_node_paths,
                  "all_leaf_nodes": all_leaf_nodes,
                  "leaf_nodes_depths": leaf_nodes_depths,
+                 "all_leaf_node_samples": all_leaf_node_samples,
+                 "all_leaf_node_samples_percent":
+                 all_leaf_node_samples_percent,
                  "all_leaf_node_values": all_leaf_node_values,
                  "tot_leaf_node_values": tot_leaf_node_values,
                  "all_leaf_node_classes": all_leaf_node_classes,
