@@ -4,6 +4,7 @@ import numpy as np
 from sklearn import metrics
 from sklearn import tree
 from sklearn.tree import _tree
+from functools import partial
 
 
 def all_tree_paths(dtree, root_node_id=0):
@@ -239,7 +240,6 @@ def get_validation_metrics(inp_class_reg_obj, y_true, X_test):
 
 
 def get_tree_data(X_train, dtree, root_node_id=0):
-
     """
     This returns all of the required summary results from an
     individual decision tree
@@ -283,7 +283,8 @@ def get_tree_data(X_train, dtree, root_node_id=0):
     >>> print(estimator0_out['all_leaf_nodes'])
     ...                             # doctest: +SKIP
     ...
-    [6, 8, 9, 10, 12, 14, 15, 19, 22, 23, 24, 25, 26, 29, 30, 32, 34, 36, 37, 40, 41, 42]
+    [6, 8, 9, 10, 12, 14, 15, 19, 22, 23, 24, \
+     25, 26, 29, 30, 32, 34, 36, 37, 40, 41, 42]
     """
 
     max_node_depth = dtree.tree_.max_depth
@@ -383,3 +384,156 @@ def get_tree_data(X_train, dtree, root_node_id=0):
                  "all_leaf_paths_features": all_leaf_paths_features,
                  "all_uniq_leaf_paths_features": all_uniq_leaf_paths_features}
     return tree_data
+
+
+# Random Intersection Tree (RIT)
+
+# Filter Comprehension helper function
+
+def _dtree_filter_comp(dtree_data,
+                       filter_key,
+                       bin_class_type):
+    """
+    List comprehension filter helper function to filter
+    the data from the `get_tree_data` function output
+    """
+
+    dtree_values = dtree_data[filter_key]
+    leaf_node_classes = dtree_data['all_leaf_node_classes']
+
+    return [i for i, j in zip(dtree_values,
+                              leaf_node_classes) if j == bin_class_type]
+
+
+def filter_leaves_classifier(dtree_data,
+                             bin_class_type):
+    """
+    Filters the leaf node data from a decision tree
+    for either {0,1} classes for iRF purposes
+    """
+
+    # Get Filtered values by specified binary class
+
+    # unique feature paths from root to leaf node
+    # Check with SVW - can the following code be improved using partial?
+    # We seem to just be filtering the same tree and class for
+    # just one changing value
+    f_uniq_feature_paths = _dtree_filter_comp(dtree_data=dtree_data,
+                                              filter_key=
+                                              'all_uniq_leaf_paths_features',
+                                              bin_class_type=bin_class_type)
+
+    f_tot_leaf_node_values = _dtree_filter_comp(dtree_data=dtree_data,
+                                                filter_key='tot_leaf_node_values',
+                                                bin_class_type=bin_class_type)
+
+    f_leaf_nodes_depths = _dtree_filter_comp(dtree_data=dtree_data,
+                                             filter_key='leaf_nodes_depths',
+                                             bin_class_type=bin_class_type)
+
+    all_filtered_values = {"f_uniq_feature_paths": f_uniq_feature_paths,
+                           "f_tot_leaf_node_values": f_tot_leaf_node_values,
+                           "f_leaf_nodes_depths": f_leaf_nodes_depths}
+
+    return all_filtered_values
+
+
+def select_random_path():
+    X = np.random.random(size=(80, 100)) > 0.3
+    XX = [np.nonzero(row)[0] for row in X]
+    # Create the random array generator
+    while True:
+        yield XX[np.random.randint(low=0, high=len(XX))]
+
+
+class RITNode(object):
+
+    def __init__(self, val):
+        self._val = val
+        self._children = []
+
+    def is_leaf(self):
+        return len(self._children) == 0
+
+    @property
+    def children(self):
+        return self._children
+
+    def add_child(self, val):
+        val_intersect = np.intersect1d(self._val, val)
+        self._children.append(RITNode(val_intersect))
+
+    def is_empty(self):
+        return len(self._val) == 0
+
+    @property
+    def nr_children(self):
+        return len(self._children) + \
+            sum(child.nr_children for child in self._children)
+
+    def _traverse_depth_first(self, _idx):
+        yield _idx[0], self
+        for child in self.children:
+            _idx[0] += 1
+            yield from RITNode._traverse_depth_first(child, _idx=_idx)
+
+
+class RITTree(RITNode):
+    def __len__(self):
+        return self.nr_children + 1
+
+    def traverse_depth_first(self):
+        yield from RITNode._traverse_depth_first(self, _idx=[0])
+
+
+def build_tree(feature_paths, max_depth=3,
+               num_splits=5, noisy_split=False,
+               _parent=None,
+               _depth=0):
+    """
+
+    Builds out the random intersection tree based
+    on the specified parameters [1]_
+
+    Parameters
+    ----------
+    feature_paths : generator of list of ints
+    ...
+    max_depth : int
+    The built tree will never be deeper than `max_depth`.
+
+    num_splits : int
+    At each node, the maximum number of children to be added.
+
+    noisy_split: bool
+    At each node if True, then number of children to split will
+    be (`num_splits`, `num_splits + 1`) based on
+    the outcome of a bernoulli(0.5) random variable
+
+    References
+    ----------
+        .. [1] Shah, Rajen Dinesh, and Nicolai Meinshausen.
+               "Random intersection trees." Journal of
+                Machine Learning Research 15.1 (2014): 629-654.
+    """
+
+    expand_tree = partial(build_tree, feature_paths,
+                          max_depth=max_depth,
+                          num_splits=num_splits,
+                          noisy_split=noisy_split)
+
+    if _parent is None:
+        tree = RITTree(next(feature_paths))
+        expand_tree(_parent=tree, _depth=0)
+        return tree
+    else:
+        _depth += 1
+        if _depth >= max_depth:
+            return
+        if noisy_split:
+            num_splits += np.random.randint(low=0, high=2)
+        for i in range(num_splits):
+            _parent.add_child(next(feature_paths))
+            added_node = _parent.children[-1]
+            if not added_node.is_empty():
+                expand_tree(_parent=added_node, _depth=_depth)

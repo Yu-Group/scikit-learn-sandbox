@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-# The following is used to draw the random forest decision tree
-# graph and display it interactively in the jupyter notebook
 import pydotplus
 import pprint
 from sklearn import tree
@@ -34,8 +32,8 @@ def generate_rf_example(sklearn_ds=load_breast_cancer(),
         3 and not changed by the user
 
     random_state_split: int (default=2017)
-    The seed used by the random number generator for the `train_test_split`
-    function in creating our training and validation sets
+        The seed used by the random number generator for the `train_test_split`
+        function in creating our training and validation sets
 
     random_state_classifier: int (default=2018)
         The seed used by the random number generator for
@@ -93,10 +91,12 @@ def draw_tree(decision_tree, out_file=None, filled=True, rounded=False,
               feature_names=None, class_names=None, label='all',
               leaves_parallel=False, impurity=True, proportion=False,
               rotate=False):
-    """This will visually display the decision tree in the jupyter notebook
-       This is useful for validation purposes of the key metrics collected
-       from the decision tree object
     """
+    This will visually display the decision tree in the jupyter notebook
+    This is useful for validation purposes of the key metrics collected
+    from the decision tree object
+    """
+
     dot_data = tree.export_graphviz(decision_tree=decision_tree,
                                     out_file=out_file, filled=filled,
                                     rounded=rounded,
@@ -113,10 +113,11 @@ def draw_tree(decision_tree, out_file=None, filled=True, rounded=False,
     display(img)
 
 
-def prettyPrintDict(inp_dict, indent_val=4):
-    """This is used to pretty print the dictionary
-        this is particularly useful for printing the dictionary of outputs
-        from each decision tree
-        """
+def pretty_print_dict(inp_dict, indent_val=4):
+    """
+    This is used to pretty print the dictionary
+    this is particularly useful for printing the dictionary of outputs
+    from each decision tree
+    """
     pp = pprint.PrettyPrinter(indent=indent_val)
     pp.pprint(inp_dict)
