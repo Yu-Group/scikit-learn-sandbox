@@ -6,7 +6,7 @@ from sklearn import tree
 from sklearn.tree import _tree
 
 
-def allTreePaths(dtree, root_node_id=0):
+def all_tree_paths(dtree, root_node_id=0):
     """
     Get all the individual tree paths from root node to the leaves
     for a decision tree classifier object [1]_.
@@ -73,15 +73,15 @@ def allTreePaths(dtree, root_node_id=0):
     # if left/right is None we'll get empty list anyway
     if children_left[root_node_id] != _tree.TREE_LEAF:
         paths = [np.append(root_node_id, l)
-                 for l in allTreePaths(dtree, children_left[root_node_id]) +
-                 allTreePaths(dtree, children_right[root_node_id])]
+                 for l in all_tree_paths(dtree, children_left[root_node_id]) +
+                 all_tree_paths(dtree, children_right[root_node_id])]
 
     else:
         paths = [root_node_id]
     return paths
 
 
-def getValidationMetrics(inp_class_reg_obj, y_true, X_test):
+def get_validation_metrics(inp_class_reg_obj, y_true, X_test):
     """
     Get the various Random Forest/ Decision Tree metrics
     This is currently setup only for classification forests and trees
@@ -128,7 +128,7 @@ def getValidationMetrics(inp_class_reg_obj, y_true, X_test):
     >>> rf = RandomForestClassifier(
         n_estimators=3, random_state=random_state_classifier)
     >>> rf.fit(X=X_train, y=y_train)
-    >>> rf_metrics = getValidationMetrics(inp_class_reg_obj = rf,
+    >>> rf_metrics = get_validation_metrics(inp_class_reg_obj = rf,
                                           y_true = y_test,
                                           X_test = X_test)
     >>> rf_metrics['confusion_matrix']
@@ -238,9 +238,52 @@ def getValidationMetrics(inp_class_reg_obj, y_true, X_test):
     return classification_metrics
 
 
-def getTreeData(X_train, dtree, root_node_id=0):
-    """This returns all of the required summary results from an
-       individual decision tree
+def get_tree_data(X_train, dtree, root_node_id=0):
+
+    """
+    This returns all of the required summary results from an
+    individual decision tree
+
+    Parameters
+    ----------
+    dtree : DecisionTreeClassifier object
+        An individual decision tree classifier object generated from a
+        fitted RandomForestClassifier object in scikit learn.
+
+    X_train : array-like or sparse matrix, shape = [n_samples, n_features]
+        Training vector, where n_samples in the number of samples and
+        n_features is the number of features.
+
+    root_node_id : int, optional (default=0)
+        The index of the root node of the tree. Should be set as default to
+        0 and not changed by the user
+
+    Returns
+    -------
+    tree_data : dict
+        Return a dictionary containing various tree metrics
+    from the input fitted Classifier object
+
+    Examples
+    --------
+    >>> from sklearn.datasets import load_breast_cancer
+    >>> from sklearn.model_selection import train_test_split
+    >>> from sklearn.ensemble import RandomForestClassifier
+    >>> raw_data = load_breast_cancer()
+    >>> X_train, X_test, y_train, y_test = train_test_split(
+        raw_data.data, raw_data.target, train_size=0.9,
+        random_state=2017)
+    >>> rf = RandomForestClassifier(
+        n_estimators=3, random_state=2018)
+    >>> rf.fit(X=X_train, y=y_train)
+    >>> estimator0 = rf.estimators_[0]
+    >>> estimator0_out = get_tree_data(X_train=X_train,
+                                     dtree=estimator0,
+                                     root_node_id=0)
+    >>> print(estimator0_out['all_leaf_nodes'])
+    ...                             # doctest: +SKIP
+    ...
+    [6, 8, 9, 10, 12, 14, 15, 19, 22, 23, 24, 25, 26, 29, 30, 32, 34, 36, 37, 40, 41, 42]
     """
 
     max_node_depth = dtree.tree_.max_depth
@@ -272,8 +315,8 @@ def getTreeData(X_train, dtree, root_node_id=0):
     num_features_used = (np.unique(node_features_idx)).shape[0]
 
     # Get all of the paths used in the tree
-    all_leaf_node_paths = allTreePaths(dtree=dtree,
-                                       root_node_id=root_node_id)
+    all_leaf_node_paths = all_tree_paths(dtree=dtree,
+                                         root_node_id=root_node_id)
 
     # Get list of leaf nodes
     # In all paths it is the final node value

@@ -12,11 +12,62 @@ from sklearn.datasets import load_breast_cancer
 
 
 def generate_rf_example(sklearn_ds=load_breast_cancer(),
-                        train_split_propn=0.7, n_estimators=10,
+                        train_split_propn=0.9, n_estimators=3,
                         random_state_split=2017, random_state_classifier=2018):
-    """ This fits a random forest classifier to the breast cancer/ iris datasets
-        This can be called from the jupyter notebook so that analysis
-        can take place quickly
+    """
+    This fits a random forest classifier to the breast cancer/ iris datasets
+    This can be called from the jupyter notebook so that analysis
+    can take place quickly
+
+    Parameters
+    ----------
+    sklearn_ds : sklearn dataset
+        Choose from the `load_breast_cancer` or the `load_iris datasets`
+        functions from the `sklearn.datasets` module
+
+    train_split_propn : float
+        Should be between 0.0 and 1.0 and represent the
+        proportion of the dataset to include in the train split.
+
+    n_estimators : int, optional (default=10)
+        The index of the root node of the tree. Should be set as default to
+        3 and not changed by the user
+
+    random_state_split: int (default=2017)
+    The seed used by the random number generator for the `train_test_split`
+    function in creating our training and validation sets
+
+    random_state_classifier: int (default=2018)
+        The seed used by the random number generator for
+        the `RandomForestClassifier` function in fitting the random forest
+
+    Returns
+    -------
+    X_train : array-like or sparse matrix, shape = [n_samples, n_features]
+        Training features vector, where n_samples in the number of samples and
+        n_features is the number of features.
+    X_test : array-like or sparse matrix, shape = [n_samples, n_features]
+        Test (validation) features vector, where n_samples in the
+        number of samples and n_features is the number of features.
+    y_train : array-like or sparse matrix, shape = [n_samples, n_classes]
+        Training labels vector, where n_samples in the number of samples and
+        n_classes is the number of classes.
+    y_test : array-like or sparse matrix, shape = [n_samples, n_classes]
+        Test (validation) labels vector, where n_samples in the
+        number of samples and n_classes is the number of classes.
+    rf : RandomForestClassifier object
+        The fitted random forest to the training data
+
+    Examples
+    --------
+    >>> from sklearn.datasets import load_breast_cancer
+    >>> X_train, X_test, y_train, y_test,
+        rf = generate_rf_example(sklearn_ds =
+                                load_breast_cancer())
+    >>> print(X_train.shape)
+    ...                             # doctest: +SKIP
+    ...
+    (512, 30)
     """
 
     # Load the relevant scikit learn data
