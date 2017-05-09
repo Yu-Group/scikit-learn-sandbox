@@ -8,6 +8,7 @@ from functools import partial
 
 
 def all_tree_paths(dtree, root_node_id=0):
+
     """
     Get all the individual tree paths from root node to the leaves
     for a decision tree classifier object [1]_.
@@ -83,6 +84,7 @@ def all_tree_paths(dtree, root_node_id=0):
 
 
 def get_validation_metrics(inp_class_reg_obj, y_true, X_test):
+
     """
     Get the various Random Forest/ Decision Tree metrics
     This is currently setup only for classification forests and trees
@@ -216,8 +218,8 @@ def get_validation_metrics(inp_class_reg_obj, y_true, X_test):
     accuracy_score = metrics.accuracy_score(y_true=y_true, y_pred=y_pred)
 
     # Build a text report showing the main classification metrics
-    classification_report = metrics.classification_report(
-        y_true=y_true, y_pred=y_pred)
+    #classification_report = metrics.classification_report(
+    #y_true=y_true, y_pred=y_pred)
 
     # Compute confusion matrix to evaluate the accuracy of a classification
     confusion_matrix = metrics.confusion_matrix(y_true=y_true, y_pred=y_pred)
@@ -232,14 +234,15 @@ def get_validation_metrics(inp_class_reg_obj, y_true, X_test):
                               "precision_score": precision_score,
                               "accuracy_score": accuracy_score,
                               "f1_score": f1_score,
-                              "classification_report": classification_report,
+                              #"classification_report": classification_report,
                               "confusion_matrix": confusion_matrix,
                               "zero_one_loss": zero_one_loss}
 
     return classification_metrics
 
 
-def get_tree_data(X_train, dtree, root_node_id=0):
+def get_tree_data(X_train, X_test, y_test, dtree, root_node_id=0):
+
     """
     This returns all of the required summary results from an
     individual decision tree
@@ -253,6 +256,13 @@ def get_tree_data(X_train, dtree, root_node_id=0):
     X_train : array-like or sparse matrix, shape = [n_samples, n_features]
         Training vector, where n_samples in the number of samples and
         n_features is the number of features.
+
+    X_test : array-like or sparse matrix, shape = [n_samples, n_features]
+        Test vector, where n_samples in the number of samples and
+        n_features is the number of features.
+
+    y_test : 1d array-like, or label indicator array / sparse matrix
+        Ground truth (correct) target values.
 
     root_node_id : int, optional (default=0)
         The index of the root node of the tree. Should be set as default to
@@ -367,6 +377,12 @@ def get_tree_data(X_train, dtree, root_node_id=0):
     all_uniq_leaf_paths_features = [
         np.unique(feature_path) for feature_path in all_leaf_paths_features]
 
+    # get the validation classification metrics for the
+    # decision tree against the test data
+    validation_metrics = get_validation_metrics(inp_class_reg_obj=dtree,
+                                                y_true=y_test,
+                                                X_test=X_test)
+
     # Dictionary of all tree values
     tree_data = {"num_features_used": num_features_used,
                  "node_features_idx": node_features_idx,
@@ -382,7 +398,8 @@ def get_tree_data(X_train, dtree, root_node_id=0):
                  "tot_leaf_node_values": tot_leaf_node_values,
                  "all_leaf_node_classes": all_leaf_node_classes,
                  "all_leaf_paths_features": all_leaf_paths_features,
-                 "all_uniq_leaf_paths_features": all_uniq_leaf_paths_features}
+                 "all_uniq_leaf_paths_features": all_uniq_leaf_paths_features,
+                 "validation_metrics": validation_metrics}
     return tree_data
 
 
@@ -427,10 +444,14 @@ def filter_leaves_classifier(dtree_data,
     # depths of each of the leaf nodes
     leaf_nodes_depths = filter_comp(filter_key='leaf_nodes_depths')
 
+    # validation metrics for the tree
+    validation_metrics = dtree_data['validation_metrics']
+
     # return all filtered outputs as a dictionary
     all_filtered_outputs = {"uniq_feature_paths": uniq_feature_paths,
                             "tot_leaf_node_values": tot_leaf_node_values,
-                           "leaf_nodes_depths": leaf_nodes_depths}
+                            "leaf_nodes_depths": leaf_nodes_depths,
+                            "validation_metrics": validation_metrics}
 
     return all_filtered_outputs
 
