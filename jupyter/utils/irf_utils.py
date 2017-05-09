@@ -412,30 +412,27 @@ def filter_leaves_classifier(dtree_data,
     for either {0,1} classes for iRF purposes
     """
 
+    filter_comp = partial(_dtree_filter_comp,
+                          dtree_data=dtree_data,
+                          bin_class_type=bin_class_type)
+
     # Get Filtered values by specified binary class
 
     # unique feature paths from root to leaf node
-    # Check with SVW - can the following code be improved using partial?
-    # We seem to just be filtering the same tree and class for
-    # just one changing value
-    f_uniq_feature_paths = _dtree_filter_comp(dtree_data=dtree_data,
-                                              filter_key=
-                                              'all_uniq_leaf_paths_features',
-                                              bin_class_type=bin_class_type)
+    uniq_feature_paths = filter_comp(filter_key='all_uniq_leaf_paths_features')
 
-    f_tot_leaf_node_values = _dtree_filter_comp(dtree_data=dtree_data,
-                                                filter_key='tot_leaf_node_values',
-                                                bin_class_type=bin_class_type)
+    # total number of training samples ending up at each node
+    tot_leaf_node_values = filter_comp(filter_key='tot_leaf_node_values')
 
-    f_leaf_nodes_depths = _dtree_filter_comp(dtree_data=dtree_data,
-                                             filter_key='leaf_nodes_depths',
-                                             bin_class_type=bin_class_type)
+    # depths of each of the leaf nodes
+    leaf_nodes_depths = filter_comp(filter_key='leaf_nodes_depths')
 
-    all_filtered_values = {"f_uniq_feature_paths": f_uniq_feature_paths,
-                           "f_tot_leaf_node_values": f_tot_leaf_node_values,
-                           "f_leaf_nodes_depths": f_leaf_nodes_depths}
+    # return all filtered outputs as a dictionary
+    all_filtered_outputs = {"uniq_feature_paths": uniq_feature_paths,
+                            "tot_leaf_node_values": tot_leaf_node_values,
+                           "leaf_nodes_depths": leaf_nodes_depths}
 
-    return all_filtered_values
+    return all_filtered_outputs
 
 
 def select_random_path():
