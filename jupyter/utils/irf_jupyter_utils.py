@@ -92,9 +92,74 @@ def draw_tree(decision_tree, out_file=None, filled=True, rounded=False,
               leaves_parallel=False, impurity=True, proportion=False,
               rotate=False):
     """
-    This will visually display the decision tree in the jupyter notebook
+    A wrapper for the `export_graphviz` function in scikit learn
+
+    Used to visually display the decision tree in the jupyter notebook
     This is useful for validation purposes of the key metrics collected
     from the decision tree object
+
+    Parameters
+    ----------
+
+    decision_tree : decision tree classifier
+        The decision tree to be exported to GraphViz.
+
+    out_file : file object or string, optional (default='tree.dot')
+        Handle or name of the output file. If ``None``, the result is
+        returned as a string. This will the default from version 0.20.
+
+    max_depth : int, optional (default=None)
+        The maximum depth of the representation. If None, the tree is fully
+        generated.
+
+    feature_names : list of strings, optional (default=None)
+        Names of each of the features.
+
+    class_names : list of strings, bool or None, optional (default=None)
+        Names of each of the target classes in ascending numerical order.
+        Only relevant for classification and not supported for multi-output.
+        If ``True``, shows a symbolic representation of the class name.
+
+    label : {'all', 'root', 'none'}, optional (default='all')
+        Whether to show informative labels for impurity, etc.
+        Options include 'all' to show at every node, 'root' to show only at
+        the top root node, or 'none' to not show at any node.
+
+    filled : bool, optional (default=False)
+        When set to ``True``, paint nodes to indicate majority class for
+        classification, extremity of values for regression, or purity of node
+        for multi-output.
+
+    leaves_parallel : bool, optional (default=False)
+        When set to ``True``, draw all leaf nodes at the bottom of the tree.
+
+    impurity : bool, optional (default=True)
+        When set to ``True``, show the impurity at each node.
+
+    node_ids : bool, optional (default=False)
+        When set to ``True``, show the ID number on each node.
+
+    proportion : bool, optional (default=False)
+        When set to ``True``, change the display of 'values' and/or 'samples'
+        to be proportions and percentages respectively.
+
+    rotate : bool, optional (default=False)
+        When set to ``True``, orient tree left to right rather than top-down.
+
+    rounded : bool, optional (default=False)
+        When set to ``True``, draw node boxes with rounded corners and use
+        Helvetica fonts instead of Times-Roman.
+
+    special_characters : bool, optional (default=False)
+        When set to ``False``, ignore special characters for PostScript
+        compatibility.
+
+    Returns
+    -------
+    A displayed png image of the decision tree based on
+    the specified display options. This is intended to be run
+    inside a jupyter notebook.
+
     """
 
     dot_data = tree.export_graphviz(decision_tree=decision_tree,
@@ -114,10 +179,26 @@ def draw_tree(decision_tree, out_file=None, filled=True, rounded=False,
 
 
 def pretty_print_dict(inp_dict, indent_val=4):
+
     """
     This is used to pretty print the dictionary
     this is particularly useful for printing the dictionary of outputs
     from each decision tree
+
+    Parameters
+    ----------
+        inp_dict : dictionary
+        Any python dictionary to be displayed in a pretty format
+
+    indent_val : int (default=4)
+        Indented value of the pretty printed dictionary. Set to 4 spaces
+        by default
+
+    Returns
+    -------
+        A pretty printed dictionary output. This is best run inside a
+        jupyter notebook.
+
     """
     pp = pprint.PrettyPrinter(indent=indent_val)
     pp.pprint(inp_dict)
