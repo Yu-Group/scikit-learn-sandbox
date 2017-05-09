@@ -5,7 +5,7 @@ from sklearn import metrics
 from sklearn import tree
 from sklearn.tree import _tree
 from functools import partial
-
+from scipy import stats
 
 def all_tree_paths(dtree, root_node_id=0):
     """
@@ -346,7 +346,7 @@ def get_tree_data(X_train, X_test, y_test, dtree, root_node_id=0):
         int) for node_id in all_leaf_nodes]
 
     # Scaled values of the leaf nodes in each of the binary classes
-    all_scaled_leaf_node_values = [float(value) / X_train_n_samples
+    all_scaled_leaf_node_values = [value/X_train_n_samples
                                    for value in all_leaf_node_values]
 
     # Total number of training samples used in the prediction of
@@ -405,9 +405,51 @@ def get_tree_data(X_train, X_test, y_test, dtree, root_node_id=0):
                  "validation_metrics": validation_metrics}
     return tree_data
 
+# Get all RF and decision tree data
+def get_rf_tree_data(rf, X_train, y_train, X_test, y_test):
+    """
+    Get the entire fitted random forest and its decision tree data
+    as a convenient dictionary format
+    """
+
+    # random forest feature importances i.e. next iRF iteration weights
+    feature_importances = rf.feature_importances_
+
+    # standard deviation of the feature importances
+    feature_importances_std = np.std(
+        [dtree.feature_importances_ for dtree in rf.estimators_], axis=0)
+    feature_importances_rank_idx = np.argsort(feature_importances)[::-1]
+
+    # get all the validation rf_metrics
+    rf_validation_metrics = get_validation_metrics(inp_class_reg_obj=rf,
+                                                   y_true=y_test,
+                                                   X_test=X_test)
+
+    # Create a dictionary with all random forest metrics
+    # This currently includes the entire random forest fitted object
+    all_rf_tree_outputs = {"rf_obj": rf,
+                           "get_params": rf.get_params,
+                           "rf_validation_metrics": rf_validation_metrics,
+                           "feature_importances": feature_importances,
+                           "feature_importances_std": feature_importances_std,
+                           "feature_importances_rank_idx": feature_importances_rank_idx}
+
+    # CHECK: Ask SVW if the following should be paralellized!
+    for idx, dtree in enumerate(rf.estimators_):
+        dtree_out = get_tree_data(X_train=X_train,
+                                  X_test=X_test,
+                                  y_test=y_test,
+                                  dtree=dtree,
+                                  root_node_id = 0)
+
+        # Append output to our combined random forest outputs dict
+        all_rf_tree_outputs["dtree{}".format(idx)] = dtree_out
+
+    return all_rf_tree_outputs
 
 # Random Intersection Tree (RIT)
 
+# FILTERING leaf paths
 # Filter Comprehension helper function
 
 def _dtree_filter_comp(dtree_data,
@@ -501,6 +543,45 @@ def filter_leaves_classifier(dtree_data,
 
     return all_filtered_outputs
 
+
+def weighted_random_choice(values, weights):
+    """Discrete distribution, drawing values with the frequency specified in weights.
+
+    Weights do not need to be normalized.
+    """
+    if not len(weights) == len(values):
+        raise ValueError('Equal number of values and weights expected')
+
+    weights = np.array(weights)
+    # normalize the weights
+    weights = weights / weights.sum()
+    dist = stats.rv_discrete(values=(range(len(weights)), weights))
+
+    while True:
+        yield values[dist.rvs()]
+
+
+def generate_rit_samples(all_rf_tree_data, bin_class_type=1):
+    """
+    Draw weighted samples from all possible decision paths
+    from the decision trees in the fitted random forest object
+    """
+
+    # Number of decision trees
+    n_estimators = all_rf_tree_data['rf_obj'].n_estimators
+
+    all_weights = []
+    all_paths = []
+    for tree in range(n_estimators):
+        filtered = filter_leaves_classifier(
+            dtree_data=all_rf_tree_data['dtree{}'.format(tree)],
+            bin_class_type=bin_class_type)
+        all_weights.extend(filtered['tot_leaf_node_values'])
+        all_paths.extend(filtered['uniq_feature_paths'])
+
+    # Return the generator of randomly sampled observations
+    # by specified weights
+    return weighted_random_choice(all_paths, all_weights)
 
 def select_random_path():
     X = np.random.random(size=(80, 100)) > 0.3
