@@ -7,6 +7,7 @@ from sklearn.tree import _tree
 from functools import partial
 from scipy import stats
 
+
 def all_tree_paths(dtree, root_node_id=0):
     """
     Get all the individual tree paths from root node to the leaves
@@ -346,7 +347,7 @@ def get_tree_data(X_train, X_test, y_test, dtree, root_node_id=0):
         int) for node_id in all_leaf_nodes]
 
     # Scaled values of the leaf nodes in each of the binary classes
-    all_scaled_leaf_node_values = [value/X_train_n_samples
+    all_scaled_leaf_node_values = [value / X_train_n_samples
                                    for value in all_leaf_node_values]
 
     # Total number of training samples used in the prediction of
@@ -406,6 +407,8 @@ def get_tree_data(X_train, X_test, y_test, dtree, root_node_id=0):
     return tree_data
 
 # Get all RF and decision tree data
+
+
 def get_rf_tree_data(rf, X_train, y_train, X_test, y_test):
     """
     Get the entire fitted random forest and its decision tree data
@@ -432,7 +435,8 @@ def get_rf_tree_data(rf, X_train, y_train, X_test, y_test):
                            "rf_validation_metrics": rf_validation_metrics,
                            "feature_importances": feature_importances,
                            "feature_importances_std": feature_importances_std,
-                           "feature_importances_rank_idx": feature_importances_rank_idx}
+                           "feature_importances_rank_idx":
+                           feature_importances_rank_idx}
 
     # CHECK: Ask SVW if the following should be paralellized!
     for idx, dtree in enumerate(rf.estimators_):
@@ -440,7 +444,7 @@ def get_rf_tree_data(rf, X_train, y_train, X_test, y_test):
                                   X_test=X_test,
                                   y_test=y_test,
                                   dtree=dtree,
-                                  root_node_id = 0)
+                                  root_node_id=0)
 
         # Append output to our combined random forest outputs dict
         all_rf_tree_outputs["dtree{}".format(idx)] = dtree_out
@@ -451,6 +455,7 @@ def get_rf_tree_data(rf, X_train, y_train, X_test, y_test):
 
 # FILTERING leaf paths
 # Filter Comprehension helper function
+
 
 def _dtree_filter_comp(dtree_data,
                        filter_key,
@@ -490,7 +495,8 @@ def _dtree_filter_comp(dtree_data,
 
     # perform the filtering and return list
     return [i for i, j in zip(dtree_values,
-                              leaf_node_classes) if j == bin_class_type]
+                              leaf_node_classes)
+            if j == bin_class_type]
 
 
 def filter_leaves_classifier(dtree_data,
@@ -545,8 +551,9 @@ def filter_leaves_classifier(dtree_data,
 
 
 def weighted_random_choice(values, weights):
-    """Discrete distribution, drawing values with the frequency specified in weights.
-
+    """
+    Discrete distribution, drawing values with the frequency
+    specified in weights.
     Weights do not need to be normalized.
     """
     if not len(weights) == len(values):
@@ -572,9 +579,9 @@ def generate_rit_samples(all_rf_tree_data, bin_class_type=1):
 
     all_weights = []
     all_paths = []
-    for tree in range(n_estimators):
+    for dtree in range(n_estimators):
         filtered = filter_leaves_classifier(
-            dtree_data=all_rf_tree_data['dtree{}'.format(tree)],
+            dtree_data=all_rf_tree_data['dtree{}'.format(dtree)],
             bin_class_type=bin_class_type)
         all_weights.extend(filtered['tot_leaf_node_values'])
         all_paths.extend(filtered['uniq_feature_paths'])
@@ -582,6 +589,7 @@ def generate_rit_samples(all_rf_tree_data, bin_class_type=1):
     # Return the generator of randomly sampled observations
     # by specified weights
     return weighted_random_choice(all_paths, all_weights)
+
 
 def select_random_path():
     X = np.random.random(size=(80, 100)) > 0.3
@@ -702,6 +710,7 @@ class RITTree(RITNode):
     """
     Class for constructing the RIT
     """
+
     def __len__(self):
         return self.nr_children + 1
 
