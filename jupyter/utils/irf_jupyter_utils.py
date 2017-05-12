@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-# The following is used to draw the random forest decision tree
-# graph and display it interactively in the jupyter notebook
 import pydotplus
 import pprint
 from sklearn import tree
@@ -12,11 +10,62 @@ from sklearn.datasets import load_breast_cancer
 
 
 def generate_rf_example(sklearn_ds=load_breast_cancer(),
-                        train_split_propn=0.7, n_estimators=10,
+                        train_split_propn=0.9, n_estimators=3,
                         random_state_split=2017, random_state_classifier=2018):
-    """ This fits a random forest classifier to the breast cancer/ iris datasets
-        This can be called from the jupyter notebook so that analysis
-        can take place quickly
+    """
+    This fits a random forest classifier to the breast cancer/ iris datasets
+    This can be called from the jupyter notebook so that analysis
+    can take place quickly
+
+    Parameters
+    ----------
+    sklearn_ds : sklearn dataset
+        Choose from the `load_breast_cancer` or the `load_iris datasets`
+        functions from the `sklearn.datasets` module
+
+    train_split_propn : float
+        Should be between 0.0 and 1.0 and represent the
+        proportion of the dataset to include in the train split.
+
+    n_estimators : int, optional (default=10)
+        The index of the root node of the tree. Should be set as default to
+        3 and not changed by the user
+
+    random_state_split: int (default=2017)
+        The seed used by the random number generator for the `train_test_split`
+        function in creating our training and validation sets
+
+    random_state_classifier: int (default=2018)
+        The seed used by the random number generator for
+        the `RandomForestClassifier` function in fitting the random forest
+
+    Returns
+    -------
+    X_train : array-like or sparse matrix, shape = [n_samples, n_features]
+        Training features vector, where n_samples in the number of samples and
+        n_features is the number of features.
+    X_test : array-like or sparse matrix, shape = [n_samples, n_features]
+        Test (validation) features vector, where n_samples in the
+        number of samples and n_features is the number of features.
+    y_train : array-like or sparse matrix, shape = [n_samples, n_classes]
+        Training labels vector, where n_samples in the number of samples and
+        n_classes is the number of classes.
+    y_test : array-like or sparse matrix, shape = [n_samples, n_classes]
+        Test (validation) labels vector, where n_samples in the
+        number of samples and n_classes is the number of classes.
+    rf : RandomForestClassifier object
+        The fitted random forest to the training data
+
+    Examples
+    --------
+    >>> from sklearn.datasets import load_breast_cancer
+    >>> X_train, X_test, y_train, y_test,
+        rf = generate_rf_example(sklearn_ds =
+                                load_breast_cancer())
+    >>> print(X_train.shape)
+    ...                             # doctest: +SKIP
+    ...
+    (512, 30)
     """
 
     # Load the relevant scikit learn data
@@ -42,10 +91,77 @@ def draw_tree(decision_tree, out_file=None, filled=True, rounded=False,
               feature_names=None, class_names=None, label='all',
               leaves_parallel=False, impurity=True, proportion=False,
               rotate=False):
-    """This will visually display the decision tree in the jupyter notebook
-       This is useful for validation purposes of the key metrics collected
-       from the decision tree object
     """
+    A wrapper for the `export_graphviz` function in scikit learn
+
+    Used to visually display the decision tree in the jupyter notebook
+    This is useful for validation purposes of the key metrics collected
+    from the decision tree object
+
+    Parameters
+    ----------
+
+    decision_tree : decision tree classifier
+        The decision tree to be exported to GraphViz.
+
+    out_file : file object or string, optional (default='tree.dot')
+        Handle or name of the output file. If ``None``, the result is
+        returned as a string. This will the default from version 0.20.
+
+    max_depth : int, optional (default=None)
+        The maximum depth of the representation. If None, the tree is fully
+        generated.
+
+    feature_names : list of strings, optional (default=None)
+        Names of each of the features.
+
+    class_names : list of strings, bool or None, optional (default=None)
+        Names of each of the target classes in ascending numerical order.
+        Only relevant for classification and not supported for multi-output.
+        If ``True``, shows a symbolic representation of the class name.
+
+    label : {'all', 'root', 'none'}, optional (default='all')
+        Whether to show informative labels for impurity, etc.
+        Options include 'all' to show at every node, 'root' to show only at
+        the top root node, or 'none' to not show at any node.
+
+    filled : bool, optional (default=False)
+        When set to ``True``, paint nodes to indicate majority class for
+        classification, extremity of values for regression, or purity of node
+        for multi-output.
+
+    leaves_parallel : bool, optional (default=False)
+        When set to ``True``, draw all leaf nodes at the bottom of the tree.
+
+    impurity : bool, optional (default=True)
+        When set to ``True``, show the impurity at each node.
+
+    node_ids : bool, optional (default=False)
+        When set to ``True``, show the ID number on each node.
+
+    proportion : bool, optional (default=False)
+        When set to ``True``, change the display of 'values' and/or 'samples'
+        to be proportions and percentages respectively.
+
+    rotate : bool, optional (default=False)
+        When set to ``True``, orient tree left to right rather than top-down.
+
+    rounded : bool, optional (default=False)
+        When set to ``True``, draw node boxes with rounded corners and use
+        Helvetica fonts instead of Times-Roman.
+
+    special_characters : bool, optional (default=False)
+        When set to ``False``, ignore special characters for PostScript
+        compatibility.
+
+    Returns
+    -------
+    A displayed png image of the decision tree based on
+    the specified display options. This is intended to be run
+    inside a jupyter notebook.
+
+    """
+
     dot_data = tree.export_graphviz(decision_tree=decision_tree,
                                     out_file=out_file, filled=filled,
                                     rounded=rounded,
@@ -62,10 +178,27 @@ def draw_tree(decision_tree, out_file=None, filled=True, rounded=False,
     display(img)
 
 
-def prettyPrintDict(inp_dict, indent_val=4):
-    """This is used to pretty print the dictionary
-        this is particularly useful for printing the dictionary of outputs
-        from each decision tree
-        """
+def pretty_print_dict(inp_dict, indent_val=4):
+
+    """
+    This is used to pretty print the dictionary
+    this is particularly useful for printing the dictionary of outputs
+    from each decision tree
+
+    Parameters
+    ----------
+        inp_dict : dictionary
+        Any python dictionary to be displayed in a pretty format
+
+    indent_val : int (default=4)
+        Indented value of the pretty printed dictionary. Set to 4 spaces
+        by default
+
+    Returns
+    -------
+        A pretty printed dictionary output. This is best run inside a
+        jupyter notebook.
+
+    """
     pp = pprint.PrettyPrinter(indent=indent_val)
     pp.pprint(inp_dict)
