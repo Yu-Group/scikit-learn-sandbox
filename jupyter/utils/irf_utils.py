@@ -5,6 +5,7 @@ from sklearn import metrics
 from sklearn import tree
 from sklearn.tree import _tree
 from functools import partial
+from functools import reduce
 from scipy import stats
 
 
@@ -53,9 +54,9 @@ def all_tree_paths(dtree, root_node_id=0):
         n_estimators=3, random_state=random_state_classifier)
     >>> rf.fit(X=X_train, y=y_train)
     >>> estimator0 = rf.estimators_[0]
-    >>> tree_dat0 = irf_utils.getTreeData(X_train = X_train,
-                                          dtree = estimator0,
-                                          root_node_id = 0)
+    >>> tree_dat0 = getTreeData(X_train = X_train,
+                                dtree = estimator0,
+                                root_node_id = 0)
     >>> tree_dat0['all_leaf_node_classes']
     ...                             # doctest: +SKIP
     ...
@@ -451,7 +452,51 @@ def get_rf_tree_data(rf, X_train, y_train, X_test, y_test):
 
     return all_rf_tree_outputs
 
+
 # Random Intersection Tree (RIT)
+
+def get_rit_tree_data(all_rf_tree_data,
+                      bin_class_type=1,
+                      random_state=12,
+                      M=10, # number of trees (RIT) to build
+                      max_depth=3,
+                      noisy_split=False,
+                      num_splits=2):
+    """
+    A wrapper for the Random Intersection Trees (RIT) algorithm
+    """
+    # Set the random seed for reproducibility
+    np.random.seed(random_state)
+
+    all_rit_tree_outputs = {}
+    for idx, rit_tree in enumerate(range(M)):
+
+        # Create the weighted randomly sampled paths as a generator
+        gen_random_leaf_paths = generate_rit_samples(
+            all_rf_tree_data=all_rf_tree_data,
+            bin_class_type=bin_class_type)
+
+        # Create the RIT object
+        rit = build_tree(feature_paths=gen_random_leaf_paths,
+                         max_depth=max_depth,
+                         noisy_split=noisy_split,
+                         num_splits=num_splits)
+
+        # Get the intersected node values
+        # CHECK remove this for the final value
+        rit_intersected_values = [node[1]._val for node in rit.traverse_depth_first()]
+        # Leaf node values i.e. final intersected features
+        rit_leaf_node_values = [node[1]._val for node in rit.leaf_nodes()]
+        rit_leaf_node_union_value = reduce(np.union1d, rit_leaf_node_values)
+        rit_output = {"rit": rit,
+                      "rit_intersected_values": rit_intersected_values,
+                      "rit_leaf_node_values": rit_leaf_node_values,
+                      "rit_leaf_node_union_value": rit_leaf_node_union_value}
+        # Append output to our combined random forest outputs dict
+        all_rit_tree_outputs["rit{}".format(idx)] = rit_output
+
+    return all_rit_tree_outputs
+
 
 # FILTERING leaf paths
 # Filter Comprehension helper function
@@ -667,9 +712,9 @@ class RITNode(object):
         n_estimators=3, random_state=random_state_classifier)
     >>> rf.fit(X=X_train, y=y_train)
     >>> estimator0 = rf.estimators_[0]
-    >>> tree_dat0 = irf_utils.getTreeData(X_train = X_train,
-                                          dtree = estimator0,
-                                          root_node_id = 0)
+    >>> tree_dat0 = getTreeData(X_train = X_train,
+                                dtree = estimator0,
+                                root_node_id = 0)
     >>> tree_dat0['all_leaf_node_classes']
     ...                             # doctest: +SKIP
     ...
