@@ -717,7 +717,12 @@ class RITTree(RITNode):
     def traverse_depth_first(self):
         yield from RITNode._traverse_depth_first(self, _idx=[0])
 
+    def leaf_nodes(self):
+        for node in self.traverse_depth_first():
+            if node[1].is_leaf():
+                yield node
 
+                #
 def build_tree(feature_paths, max_depth=3,
                num_splits=5, noisy_split=False,
                _parent=None,
@@ -736,7 +741,7 @@ def build_tree(feature_paths, max_depth=3,
         The built tree will never be deeper than `max_depth`.
 
     num_splits : int
-        At each node, the maximum number of children to be added.
+            At each node, the maximum number of children to be added.
 
     noisy_split: bool
         At each node if True, then number of children to
@@ -747,7 +752,7 @@ def build_tree(feature_paths, max_depth=3,
     References
     ----------
         .. [1] Shah, Rajen Dinesh, and Nicolai Meinshausen.
-               "Random intersection trees." Journal of
+                "Random intersection trees." Journal of
                 Machine Learning Research 15.1 (2014): 629-654.
     """
 
@@ -760,6 +765,7 @@ def build_tree(feature_paths, max_depth=3,
         tree = RITTree(next(feature_paths))
         expand_tree(_parent=tree, _depth=0)
         return tree
+
     else:
         _depth += 1
         if _depth >= max_depth:
