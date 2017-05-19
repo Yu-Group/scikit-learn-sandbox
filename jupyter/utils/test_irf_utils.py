@@ -192,6 +192,7 @@ leaf_paths_features = [[20,24,27,10,0], [20,24,27,10,0,6,0], \
                            
 node_depths = [5, 7, 9,9, 8, 7,7,5,5,6,7,7,5,4,3,3,4,4,4,4,2]
 
+
 def test_RF_output():
     assert(np.all(\
             np.concatenate(all_rf_tree_data['dtree1']['all_leaf_node_paths']) ==\
