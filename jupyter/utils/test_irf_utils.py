@@ -204,3 +204,4 @@ def test_RF_output():
                   == np.concatenate(leaf_paths_features) ))
 
     assert(np.all(node_depths == all_rf_tree_data['dtree1']['leaf_nodes_depths']))
+    print('')
