@@ -24,7 +24,7 @@ all_rf_tree_data = \
 
 # Get the RIT data and produce RITs
 np.random.seed(12)
-gen_random_leaf_paths = irf_utils.generate_rit_samples(
+gen_random_leaf_paths = irf_utils._generate_rit_samples(
     all_rf_tree_data=all_rf_tree_data,
     bin_class_type=1)
 
@@ -58,7 +58,7 @@ all_rit_tree_data = irf_utils.get_rit_tree_data(
     all_rf_tree_data=all_rf_tree_data,
     bin_class_type=1,
     random_state=12,
-    M=10,
+    n_estimators=10,
     max_depth=3,
     noisy_split=False,
     num_splits=2)
