@@ -7,7 +7,7 @@ from sklearn.tree import _tree
 from functools import partial
 from functools import reduce
 from scipy import stats
-
+import matplotlib.pyplot as plt
 
 def all_tree_paths(dtree, root_node_id=0):
     """
@@ -822,3 +822,53 @@ def build_tree(feature_paths, max_depth=3,
             added_node = _parent.children[-1]
             if not added_node.is_empty():
                 expand_tree(_parent=added_node, _depth=_depth)
+
+
+# extract interactions from RIT output
+def RIT_interactions(all_rit_tree_data, plot = False):
+    """
+    Extracts all interactions produced by one run of RIT
+    To get interactions across many runs of RIT (like when we do bootstrap sampling for stability),
+        first concantenate those dictionaries into one
+
+    Parameters
+    ------
+    all_rit_tree_data : dict
+        Output of RIT as defined by the function 'get_rit_tree_data'
+
+    plot : boolean, optional (default == FALSE)
+        If true, create bar plot with counts of discovered interactions
+
+    Returns
+    ------
+    interact_counts : dict
+        interact_counts.keys() store the discovered interactions
+        interact_counts.values() store the frequency of the interaction
+
+
+    """
+
+    list_interactions = []
+
+    for k in all_rit_tree_data: # loop through all trees
+
+        for j in range(len(all_rit_tree_data[k]['rit_intersected_values'])): # loop through all found interactions
+
+            if len(all_rit_tree_data[k]['rit_intersected_values'][j])!=0: # if not null:
+
+                # stores interaction as string : eg. np.array([1,12,23]) becomes '1_12_23'
+                a = '_'.join(map(str, all_rit_tree_data[k]['rit_intersected_values'][j]))
+                list_interactions.append(a)
+
+
+    interact_counts = {m:list_interactions.count(m) for m in list_interactions}
+
+    if plot:
+        plt.bar(np.arange(len(interact_counts)), interact_counts.values(), align = 'center', alpha = 0.5)
+        plt.xticks(np.arange(len(interact_counts)), interact_counts.keys(), rotation = 'vertical')
+        plt.xlabel('interaction')
+        plt.ylabel('counts')
+        plt.show()
+
+
+    return interact_counts
