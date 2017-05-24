@@ -7,7 +7,7 @@ from sklearn.tree import _tree
 from functools import partial
 from functools import reduce
 from scipy import stats
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 def all_tree_paths(dtree, root_node_id=0):
     """
