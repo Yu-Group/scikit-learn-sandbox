@@ -10,7 +10,7 @@ from sklearn.datasets import load_breast_cancer
 
 
 def generate_rf_example(sklearn_ds=load_breast_cancer(),
-                        train_split_propn=0.9, n_estimators=3,
+                        train_split_propn=0.9, n_estimators=3, feature_weight = None,
                         random_state_split=2017, random_state_classifier=2018):
     """
     This fits a random forest classifier to the breast cancer/ iris datasets
@@ -30,6 +30,9 @@ def generate_rf_example(sklearn_ds=load_breast_cancer(),
     n_estimators : int, optional (default=10)
         The index of the root node of the tree. Should be set as default to
         3 and not changed by the user
+        
+    feature_weight : list, optional (default=None)
+        The chance of splitting at each feature.
 
     random_state_split: int (default=2017)
         The seed used by the random number generator for the `train_test_split`
@@ -79,9 +82,12 @@ def generate_rf_example(sklearn_ds=load_breast_cancer(),
     # Just fit a simple random forest classifier with 2 decision trees
     rf = RandomForestClassifier(
         n_estimators=n_estimators, random_state=random_state_classifier)
-
+    
     # fit the classifier
-    rf.fit(X=X_train, y=y_train)
+    if feature_weight==None:
+        rf.fit(X=X_train, y=y_train)
+    else:
+        rf.fit(X=X_train, y=y_train, feature_weight=feature_weight)
 
     return X_train, X_test, y_train, y_test, rf
 
