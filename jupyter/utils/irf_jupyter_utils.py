@@ -84,7 +84,10 @@ def generate_rf_example(sklearn_ds=load_breast_cancer(),
         n_estimators=n_estimators, random_state=random_state_classifier)
     
     # fit the classifier
-    rf.fit(X=X_train, y=y_train, feature_weight=feature_weight)
+    if feature_weight==None:
+        rf.fit(X=X_train, y=y_train)
+    else:
+        rf.fit(X=X_train, y=y_train, feature_weight=feature_weight)
 
     return X_train, X_test, y_train, y_test, rf
 
