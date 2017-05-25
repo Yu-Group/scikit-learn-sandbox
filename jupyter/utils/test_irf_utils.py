@@ -163,3 +163,59 @@ def test_build_tree():
     assert(len(rit0) <= 1 + 5 + 5**2)
     assert(len(rit1) <= 1 + 6 + 6**2)
     assert(len(rit2) == 1)
+
+
+# testing RF interactions
+def test_RF_output():
+    leaf_node_path = [[0,1,2,3,4,5], [0,1,2,3,4,6,7,8], [0,1,2,3,4,6,7,9,10,11],\
+                      [0,1,2,3,4,6,7,9,10,12], [0,1,2,3,4,6,7,9,13], \
+                      [0,1,2,3,4,6,14,15],[0,1,2,3,4,6,14,16], \
+                      [0,1,2,3,17,18], [0,1,2,3,17,19],
+                      [0,1,2,20,21,22,23], [0,1,2,20,21,22,24,25], [0,1,2,20,21,22,24,26],\
+                      [0,1,2,20,21,27], [0,1,2,20,28], [0,1,29,30], [0,1,29,31],\
+                      [0,32,33,34,35], [0,32,33,34,36], [0,32,33,37,38], [0,32,33,37,39], [0,32,40]]
+
+
+    leaf_node_samples = [114,1,3,1,67,1,1,1,3,2,3,1,3,7,2,7,1,11,3,1,91]
+
+    leaf_node_values = [[0,189], [3,0], [0,5], [1,0], [0,101], [1,0], [0,1], \
+                            [2,0], [0,3], [0,2], [5,0], [0,1], [0,7], [10,0], [0,3], \
+                            [12,0], [0,2], [19, 0], [0,7], [1,0], [137,0]]
+
+    leaf_paths_features = [[20,24,27,10,0], [20,24,27,10,0,6,0], \
+                               [20,24,27,10,0,6,0,14,20], [20,24,27,10,0,6,0,14,20],
+                               [20,24,27,10,0,6,0,14], [20,24,27,10,0,6,18], \
+                               [20,24,27,10,0,6,18], [20,24,27,10,28],[20,24,27,10,28],\
+                               [20,24,27,21,6,6], [20,24,27,21,6,6,12],[20,24,27,21,6,6,12],\
+                               [20,24,27,21,6],[20,24,27,21], [20,24,22],[20,24,22], [20,7,17,29], \
+                               [20,7,17,29], [20,7,17,28],[20,7,17,28], [20,7]]
+
+
+    node_depths = [5,7,9,9,8,7,7,5,5,6,7,7,5,4,3,3,4,4,4,4,2]
+
+    assert(np.all(\
+            np.concatenate(all_rf_tree_data['dtree1']['all_leaf_node_paths']) ==\
+            np.concatenate(leaf_node_path)))
+    assert(np.all(all_rf_tree_data['dtree1']['all_leaf_node_samples']==leaf_node_samples))
+
+    assert(np.all(np.concatenate(all_rf_tree_data['dtree1']['all_leaf_node_values'], axis=0) == leaf_node_values))
+
+    assert(np.all(np.concatenate(all_rf_tree_data['dtree1']['all_leaf_paths_features']) \
+                  == np.concatenate(leaf_paths_features) ))
+
+    assert(np.all(node_depths == all_rf_tree_data['dtree1']['leaf_nodes_depths']))
+
+
+# test RIT_interactions
+def test_RIT_interactions():
+    all_rit_tree_data_test = {'rit0' : {'rit_intersected_values' : [np.array([1,2,3]), np.array([1,2])]},\
+                    'rit1' : {'rit_intersected_values' : [np.array([1,2,3,4]), np.array([1,2,3])]},\
+                   'rit2' : {'rit_intersected_values' : [np.array([1,2]), np.array([5,6]), np.array([])] },\
+                    'rit3' : {'rit_intersected_values' : [np.array([1,2,3]), np.array([1,2,3,4])]},\
+                    'rit4' : {'rit_intersected_values' : [np.array([1,2,3]), np.array([1,2,3])]}\
+                    }
+
+    output = irf_utils.rit_interactions(all_rit_tree_data_test)
+
+    assert(list(output.keys()) == ['1_2_3', '1_2', '1_2_3_4', '5_6'])
+    assert(list(output.values()) == [5, 2, 2, 1])
