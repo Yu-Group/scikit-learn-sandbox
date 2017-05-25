@@ -14,12 +14,10 @@ X_train, X_test, y_train, \
         sklearn_ds=breast_cancer, n_estimators=10)
 
 # Get all of the random forest and decision tree data
-all_rf_tree_data = \
-    irf_utils.get_rf_tree_data(rf=rf,
-                               X_train=X_train,
-                               y_train=y_train,
-                               X_test=X_test,
-                               y_test=y_test)
+all_rf_tree_data = irf_utils.get_rf_tree_data(rf=rf,
+                                              X_train=X_train,
+                                              X_test=X_test,
+                                              y_test=y_test)
 
 # Get the RIT data and produce RITs
 np.random.seed(12)
@@ -53,10 +51,10 @@ rit2 = irf_utils.build_tree(
     num_splits=5)
 
 # Get the entire RIT data
+np.random.seed(12)
 all_rit_tree_data = irf_utils.get_rit_tree_data(
     all_rf_tree_data=all_rf_tree_data,
     bin_class_type=1,
-    random_state=12,
     M=10,
     max_depth=3,
     noisy_split=False,

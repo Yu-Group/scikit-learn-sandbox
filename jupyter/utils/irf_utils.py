@@ -9,6 +9,7 @@ from functools import reduce
 from scipy import stats
 import matplotlib.pyplot as plt
 
+
 def all_tree_paths(dtree, root_node_id=0):
     """
     Get all the individual tree paths from root node to the leaves
@@ -410,7 +411,7 @@ def get_tree_data(X_train, X_test, y_test, dtree, root_node_id=0):
 # Get all RF and decision tree data
 
 
-def get_rf_tree_data(rf, X_train, y_train, X_test, y_test):
+def get_rf_tree_data(rf, X_train, X_test, y_test):
     """
     Get the entire fitted random forest and its decision tree data
     as a convenient dictionary format
@@ -457,16 +458,13 @@ def get_rf_tree_data(rf, X_train, y_train, X_test, y_test):
 
 def get_rit_tree_data(all_rf_tree_data,
                       bin_class_type=1,
-                      random_state=12,
-                      M=10, # number of trees (RIT) to build
+                      M=10,  # number of trees (RIT) to build
                       max_depth=3,
                       noisy_split=False,
                       num_splits=2):
     """
     A wrapper for the Random Intersection Trees (RIT) algorithm
     """
-    # Set the random seed for reproducibility
-    np.random.seed(random_state)
 
     all_rit_tree_outputs = {}
     for idx, rit_tree in enumerate(range(M)):
@@ -484,7 +482,8 @@ def get_rit_tree_data(all_rf_tree_data,
 
         # Get the intersected node values
         # CHECK remove this for the final value
-        rit_intersected_values = [node[1]._val for node in rit.traverse_depth_first()]
+        rit_intersected_values = [
+            node[1]._val for node in rit.traverse_depth_first()]
         # Leaf node values i.e. final intersected features
         rit_leaf_node_values = [node[1]._val for node in rit.leaf_nodes()]
         rit_leaf_node_union_value = reduce(np.union1d, rit_leaf_node_values)
@@ -646,79 +645,8 @@ def select_random_path():
 
 class RITNode(object):
     """
-    A decision tree classifier.
-
-    Read more in the :ref:`User Guide <tree>`.
-
-    Parameters
-    ----------
-    criterion : string, optional (default="gini")
-        The function to measure the quality of a split. Supported criteria are
-        "gini" for the Gini impurity and "entropy" for the information gain.
-
-    splitter : string, optional (default="best")
-        The strategy used to choose the split at each node. Supported
-        strategies are "best" to choose the best split and "random" to choose
-        the best random split.
-
-    min_samples_split : int, float, optional (default=2)
-        The minimum number of samples required to split an internal node:
-        - If int, then consider `min_samples_split` as the minimum number.
-        - If float, then `min_samples_split` is a percentage and
-          `ceil(min_samples_split * n_samples)` are the minimum
-          number of samples for each split.
-        .. versionchanged:: 0.18
-           Added float values for percentages.
-
-    random_state : int, RandomState instance or None, optional (default=None)
-        If int, random_state is the seed used by the random number generator;
-        If RandomState instance, random_state is the random number generator;
-        If None, the random number generator is the RandomState instance used
-        by `np.random`.
-
-    Attributes
-    ----------
-    classes_ : array of shape = [n_classes] or a list of such arrays
-        The classes labels (single output problem),
-        or a list of arrays of class labels (multi-output problem).
-
-    feature_importances_ : array of shape = [n_features]
-        The feature importances. The higher, the more important the
-        feature. The importance of a feature is computed as the (normalized)
-        total reduction of the criterion brought by that feature.  It is also
-        known as the Gini importance [4]_.
-
-    max_features_ : int,
-        The inferred value of max_features.
-
-    n_classes_ : int or list
-        The number of classes (for single output problems),
-        or a list containing the number of classes for each
-        output (for multi-output problems).
-
-    n_features_ : int
-        The number of features when ``fit`` is performed.
-
-    Examples
-    --------
-    >>> from sklearn.datasets import load_breast_cancer
-    >>> from sklearn.model_selection import train_test_split
-    >>> from sklearn.ensemble import RandomForestClassifier
-    >>> raw_data = load_breast_cancer()
-    >>> X_train, X_test, y_train, y_test = train_test_split(
-        raw_data.data, raw_data.target, train_size=0.9,
-        random_state=2017)
-    >>> rf = RandomForestClassifier(
-        n_estimators=3, random_state=random_state_classifier)
-    >>> rf.fit(X=X_train, y=y_train)
-    >>> estimator0 = rf.estimators_[0]
-    >>> tree_dat0 = getTreeData(X_train = X_train,
-                                dtree = estimator0,
-                                root_node_id = 0)
-    >>> tree_dat0['all_leaf_node_classes']
-    ...                             # doctest: +SKIP
-    ...
-    [1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0]
+    A helper class used to construct the RIT Node
+    in the generation of the Random Intersection Tree (RIT)
     """
 
     def __init__(self, val):
@@ -768,6 +696,8 @@ class RITTree(RITNode):
                 yield node
 
                 #
+
+
 def build_tree(feature_paths, max_depth=3,
                num_splits=5, noisy_split=False,
                _parent=None,
@@ -850,19 +780,22 @@ def rit_interactions(all_rit_tree_data):
         # loop through all found interactions
         for j in range(len(all_rit_tree_data[k]['rit_intersected_values'])):
             # if not null:
-            if len(all_rit_tree_data[k]['rit_intersected_values'][j])!=0:
+            if len(all_rit_tree_data[k]['rit_intersected_values'][j]) != 0:
 
-                # stores interaction as string : eg. np.array([1,12,23]) becomes '1_12_23'
-                a = '_'.join(map(str, all_rit_tree_data[k]['rit_intersected_values'][j]))
+                # stores interaction as string : eg. np.array([1,12,23])
+                # becomes '1_12_23'
+                a = '_'.join(
+                    map(str,
+                        all_rit_tree_data[k]['rit_intersected_values'][j]))
                 interactions.append(a)
 
-
-    interact_counts = {m:interactions.count(m) for m in interactions}
+    interact_counts = {m: interactions.count(m) for m in interactions}
     return interact_counts
 
+
 def _get_histogram(interact_counts, xlabel='interaction',
-                     ylabel='counts',
-                     sort=False):
+                   ylabel='counts',
+                   sort=False):
     """
     Helper function to plot the histogram from a dictionary of
     count data
@@ -883,15 +816,15 @@ def _get_histogram(interact_counts, xlabel='interaction',
         to interactions with lowest frequency
     """
     if sort:
-        data_y = sorted(interact_counts.values(), reverse = True)
-        data_x = sorted(interact_counts, key = interact_counts.get, \
-                            reverse = True)
+        data_y = sorted(interact_counts.values(), reverse=True)
+        data_x = sorted(interact_counts, key=interact_counts.get,
+                        reverse=True)
         data = {data_x[i]: data_y[i] for i in range(len(data_x))}
     else:
         data = interact_counts
 
-    plt.bar(np.arange(len(data)), data.values(), align = 'center', alpha = 0.5)
-    plt.xticks(np.arange(len(data)), data.keys(), rotation = 'vertical')
+    plt.bar(np.arange(len(data)), data.values(), align='center', alpha=0.5)
+    plt.xticks(np.arange(len(data)), data.keys(), rotation='vertical')
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.show()

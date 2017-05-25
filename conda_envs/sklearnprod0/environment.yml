@@ -10,6 +10,7 @@ dependencies:
   - pip
   - jupyter_contrib_nbextensions
   - pandas
+  - matplotlib
   - pip:
       - nose-timer
       - wheelhouse_uploader
@@ -21,7 +22,6 @@ dependencies:
       - graphviz
       - jupyter
       - pandas
-      - matplotlib
       - pillow
       - graphviz
       - pydotplus
