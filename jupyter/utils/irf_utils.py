@@ -7,7 +7,7 @@ from sklearn.tree import _tree
 from functools import partial
 from functools import reduce
 from scipy import stats
-
+import matplotlib.pyplot as plt
 
 def all_tree_paths(dtree, root_node_id=0):
     """
@@ -822,3 +822,76 @@ def build_tree(feature_paths, max_depth=3,
             added_node = _parent.children[-1]
             if not added_node.is_empty():
                 expand_tree(_parent=added_node, _depth=_depth)
+
+
+# extract interactions from RIT output
+def rit_interactions(all_rit_tree_data):
+    """
+    Extracts all interactions produced by one run of RIT
+    To get interactions across many runs of RIT (like when we do bootstrap \
+        sampling for stability),
+        first concantenate those dictionaries into one
+
+    Parameters
+    ------
+    all_rit_tree_data : dict
+        Output of RIT as defined by the function 'get_rit_tree_data'
+
+    Returns
+    ------
+    interact_counts : dict
+        A dictionary whose keys are the discovered interactions and
+        whose values store their respective frequencies
+    """
+
+    interactions = []
+    # loop through all trees
+    for k in all_rit_tree_data:
+        # loop through all found interactions
+        for j in range(len(all_rit_tree_data[k]['rit_intersected_values'])):
+            # if not null:
+            if len(all_rit_tree_data[k]['rit_intersected_values'][j])!=0:
+
+                # stores interaction as string : eg. np.array([1,12,23]) becomes '1_12_23'
+                a = '_'.join(map(str, all_rit_tree_data[k]['rit_intersected_values'][j]))
+                interactions.append(a)
+
+
+    interact_counts = {m:interactions.count(m) for m in interactions}
+    return interact_counts
+
+def _get_histogram(interact_counts, xlabel='interaction',
+                     ylabel='counts',
+                     sort=False):
+    """
+    Helper function to plot the histogram from a dictionary of
+    count data
+
+    Paremeters
+    -------
+    interact_counts : dict
+        counts of interactions as outputed from the 'rit_interactions' function
+
+    xlabel : str, optional (default = 'interaction')
+        label on the x-axis
+
+    ylabel : str, optional (default = 'counts')
+        label on the y-axis
+
+    sorted : boolean, optional (default = 'False')
+        If True, sort the histogram from interactions with highest frequency
+        to interactions with lowest frequency
+    """
+    if sort:
+        data_y = sorted(interact_counts.values(), reverse = True)
+        data_x = sorted(interact_counts, key = interact_counts.get, \
+                            reverse = True)
+        data = {data_x[i]: data_y[i] for i in range(len(data_x))}
+    else:
+        data = interact_counts
+
+    plt.bar(np.arange(len(data)), data.values(), align = 'center', alpha = 0.5)
+    plt.xticks(np.arange(len(data)), data.keys(), rotation = 'vertical')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.show()
