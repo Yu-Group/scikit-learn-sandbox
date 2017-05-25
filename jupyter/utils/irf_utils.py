@@ -825,7 +825,7 @@ def build_tree(feature_paths, max_depth=3,
 
 
 # extract interactions from RIT output
-def RIT_interactions(all_rit_tree_data, plot = False):
+def rit_interactions(all_rit_tree_data, plot = False):
     """
     Extracts all interactions produced by one run of RIT
     To get interactions across many runs of RIT (like when we do bootstrap sampling for stability),

@@ -164,7 +164,7 @@ def test_build_tree():
     assert(len(rit2) == 1)
 
 
-def test_RF_output():
+def test_rf_output():
     leaf_node_path = [[0,1,2,3,4,5], [0,1,2,3,4,6,7,8], [0,1,2,3,4,6,7,9,10,11],\
                       [0,1,2,3,4,6,7,9,10,12], [0,1,2,3,4,6,7,9,13], \
                       [0,1,2,3,4,6,14,15],[0,1,2,3,4,6,14,16], \
@@ -204,8 +204,8 @@ def test_RF_output():
 
 
 # test RIT_interactions
-def test_RIT_interactions():
-    all_rit_tree_data = {'rit0' : {'rit_intersected_values' : [np.array([1,2,3]), np.array([1,2])]},\
+def test_rit_interactions():
+    all_rit_tree_data_test = {'rit0' : {'rit_intersected_values' : [np.array([1,2,3]), np.array([1,2])]},\
                     'rit1' : {'rit_intersected_values' : [np.array([1,2,3,4]), np.array([1,2,3])]},\
                    'rit2' : {'rit_intersected_values' : [np.array([1,2]), np.array([5,6]), np.array([])] },\
                     'rit3' : {'rit_intersected_values' : [np.array([1,2,3]), np.array([1,2,3,4])]},\
