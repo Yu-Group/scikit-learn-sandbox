@@ -825,10 +825,11 @@ def build_tree(feature_paths, max_depth=3,
 
 
 # extract interactions from RIT output
-def rit_interactions(all_rit_tree_data, plot = False):
+def rit_interactions(all_rit_tree_data):
     """
     Extracts all interactions produced by one run of RIT
-    To get interactions across many runs of RIT (like when we do bootstrap sampling for stability),
+    To get interactions across many runs of RIT (like when we do bootstrap \
+        sampling for stability),
         first concantenate those dictionaries into one
 
     Parameters
@@ -836,39 +837,61 @@ def rit_interactions(all_rit_tree_data, plot = False):
     all_rit_tree_data : dict
         Output of RIT as defined by the function 'get_rit_tree_data'
 
-    plot : boolean, optional (default == FALSE)
-        If true, create bar plot with counts of discovered interactions
-
     Returns
     ------
     interact_counts : dict
-        interact_counts.keys() store the discovered interactions
-        interact_counts.values() store the frequency of the interaction
-
-
+        A dictionary whose keys are the discovered interactions and
+        whose values store their respective frequencies
     """
 
-    list_interactions = []
-
-    for k in all_rit_tree_data: # loop through all trees
-
-        for j in range(len(all_rit_tree_data[k]['rit_intersected_values'])): # loop through all found interactions
-
-            if len(all_rit_tree_data[k]['rit_intersected_values'][j])!=0: # if not null:
+    interactions = []
+    # loop through all trees
+    for k in all_rit_tree_data:
+        # loop through all found interactions
+        for j in range(len(all_rit_tree_data[k]['rit_intersected_values'])):
+            # if not null:
+            if len(all_rit_tree_data[k]['rit_intersected_values'][j])!=0:
 
                 # stores interaction as string : eg. np.array([1,12,23]) becomes '1_12_23'
                 a = '_'.join(map(str, all_rit_tree_data[k]['rit_intersected_values'][j]))
-                list_interactions.append(a)
+                interactions.append(a)
 
 
-    interact_counts = {m:list_interactions.count(m) for m in list_interactions}
-
-    if plot:
-        plt.bar(np.arange(len(interact_counts)), interact_counts.values(), align = 'center', alpha = 0.5)
-        plt.xticks(np.arange(len(interact_counts)), interact_counts.keys(), rotation = 'vertical')
-        plt.xlabel('interaction')
-        plt.ylabel('counts')
-        plt.show()
-
-
+    interact_counts = {m:interactions.count(m) for m in interactions}
     return interact_counts
+
+def _get_histogram(interact_counts, xlabel='interaction',
+                     ylabel='counts',
+                     sort=False):
+    """
+    Helper function to plot the histogram from a dictionary of
+    count data
+
+    Paremeters
+    -------
+    interact_counts : dict
+        counts of interactions as outputed from the 'rit_interactions' function
+
+    xlabel : str, optional (default = 'interaction')
+        label on the x-axis
+
+    ylabel : str, optional (default = 'counts')
+        label on the y-axis
+
+    sorted : boolean, optional (default = 'False')
+        If True, sort the histogram from interactions with highest frequency
+        to interactions with lowest frequency
+    """
+    if sort:
+        data_y = sorted(interact_counts.values(), reverse = True)
+        data_x = sorted(interact_counts, key = interact_counts.get, \
+                            reverse = True)
+        data = {data_x[i]: data_y[i] for i in range(len(data_x))}
+    else:
+        data = interact_counts
+
+    plt.bar(np.arange(len(data)), data.values(), align = 'center', alpha = 0.5)
+    plt.xticks(np.arange(len(data)), data.keys(), rotation = 'vertical')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.show()
