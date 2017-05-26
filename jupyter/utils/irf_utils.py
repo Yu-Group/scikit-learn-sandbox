@@ -1067,3 +1067,33 @@ def run_iRF(X_train,
         all_rit_bootstrap_output=all_rit_bootstrap_output)
 
     return all_rf_weights, all_K_iter_rf_data, all_rf_bootstrap_output, all_rit_bootstrap_output, stability_score
+
+def _hist_features(all_rf_tree_data, n_estimators, \
+                   xlabel = 'features', ylabel = 'frequency', title = 'Frequency of features along decision paths'): 
+    """
+    Generate histogram of number of appearances a feature appeared along a decision path in the forest
+    """
+
+    all_features = []
+
+    for i in range(n_estimators):
+        tree_id = 'dtree'+str(i)
+
+        a = np.concatenate(all_rf_tree_data[tree_id]['all_uniq_leaf_paths_features'])
+        all_features.append(a)
+
+    all_features = np.concatenate(all_features)
+
+    counts = {m:np.sum(all_features == m) for m in all_features}
+    data_y = sorted(counts.values(), reverse=True)
+    data_x = sorted(counts, key=counts.get, reverse=True)
+    plt.figure(figsize=(15, 8))
+    plt.clf()
+    plt.bar(np.arange(len(data_x)), data_y, align='center', alpha=0.5)
+    plt.xticks(np.arange(len(data_x)), data_x, rotation='vertical')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.show()
+
+
