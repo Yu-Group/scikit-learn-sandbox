@@ -9,6 +9,11 @@ from functools import reduce
 from scipy import stats
 import matplotlib.pyplot as plt
 
+# Needed for the scikit-learn wrapper function
+from sklearn.utils import resample
+from sklearn.ensemble import RandomForestClassifier
+from math import ceil
+
 
 def all_tree_paths(dtree, root_node_id=0):
     """
@@ -794,7 +799,7 @@ def rit_interactions(all_rit_tree_data):
 
 
 def _get_histogram(interact_counts, xlabel='interaction',
-                   ylabel='counts',
+                   ylabel='stability',
                    sort=False):
     """
     Helper function to plot the histogram from a dictionary of
@@ -815,16 +820,250 @@ def _get_histogram(interact_counts, xlabel='interaction',
         If True, sort the histogram from interactions with highest frequency
         to interactions with lowest frequency
     """
+
     if sort:
         data_y = sorted(interact_counts.values(), reverse=True)
         data_x = sorted(interact_counts, key=interact_counts.get,
                         reverse=True)
-        data = {data_x[i]: data_y[i] for i in range(len(data_x))}
     else:
-        data = interact_counts
+        data_x = interact_counts.keys()
+        data_y = interact_counts.values()
 
-    plt.bar(np.arange(len(data)), data.values(), align='center', alpha=0.5)
-    plt.xticks(np.arange(len(data)), data.keys(), rotation='vertical')
+    plt.figure(figsize=(15, 8))
+    plt.clf()
+    plt.bar(np.arange(len(data_x)), data_y, align='center', alpha=0.5)
+    plt.xticks(np.arange(len(data_x)), data_x, rotation='vertical')
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.show()
+
+
+def _get_stability_score(all_rit_bootstrap_output):
+    """
+    Get the stabilty score from B bootstrap Random Forest
+    Fits with RITs
+    """
+
+    # Initialize values
+    bootstrap_interact = []
+    B = len(all_rit_bootstrap_output)
+
+    for b in range(B):
+        rit_counts = rit_interactions(
+            all_rit_bootstrap_output['rf_bootstrap{}'.format(b)])
+        rit_counts = list(rit_counts.keys())
+        bootstrap_interact.append(rit_counts)
+
+    flatten = lambda l: [item for sublist in l for item in sublist]
+    all_rit_interactions = flatten(bootstrap_interact)
+    stability = {m:all_rit_interactions.count(m)/B for m in all_rit_interactions}
+    return stability
+
+
+def run_iRF(X_train,
+            X_test,
+            y_train,
+            y_test,
+            K=7,
+            n_estimators=20,
+            B=10,
+            random_state_classifier=2018,
+            propn_n_samples=0.2,
+            bin_class_type=1,
+            M=4,
+            max_depth=2,
+            noisy_split=False,
+            num_splits=2,
+            n_estimators_bootstrap=5):
+    """
+    Runs the iRF algorithm in full.
+
+
+    Parameters
+    --------
+    X_train : array-like or sparse matrix, shape = [n_samples, n_features]
+        Training vector, where n_samples in the number of samples and
+        n_features is the number of features.
+
+    X_test : array-like or sparse matrix, shape = [n_samples, n_features]
+        Test vector, where n_samples in the number of samples and
+        n_features is the number of features.
+
+    y_train : 1d array-like, or label indicator array / sparse matrix
+        Ground truth (correct) target values for training.
+
+    y_test : 1d array-like, or label indicator array / sparse matrix
+        Ground truth (correct) target values for testing.
+
+
+    K : int, optional (default = 7)
+        The number of iterations in iRF.
+
+    n_estimators : int, optional (default = 20)
+        The number of trees in the random forest when computing weights.
+
+    B : int, optional (default = 10)
+        The number of bootstrap samples
+
+    random_state_classifier : int, optional (default = 2018)
+        The random seed for reproducibility.
+
+    propn_n_samples : float, optional (default = 0.2)
+        The proportion of samples drawn for bootstrap.
+
+    bin_class_type : int, optional (default = 1)
+        ...
+
+    max_depth : int, optional (default = 2)
+        The built tree will never be deeper than `max_depth`.
+
+    num_splits : int, optional (default = 2)
+            At each node, the maximum number of children to be added.
+
+    noisy_split: bool, optional (default = False)
+        At each node if True, then number of children to
+        split will be (`num_splits`, `num_splits + 1`)
+        based on the outcome of a bernoulli(0.5)
+        random variable
+
+    n_estimators_bootstrap : int, optional (default = 5)
+        The number of trees in the random forest when fitting to bootstrap samples
+
+    Returns
+    --------
+    all_rf_weights: dict
+        stores feature weights across all iterations
+
+    all_rf_bootstrap_output: dict
+        stores rf information across all bootstrap samples
+
+    all_rit_bootstrap_output: dict
+        stores rit information across all bootstrap samples
+
+    stability_score: dict
+        stores interactions in as its keys and stabilities scores as the values
+
+    """
+
+    # Set the random state for reproducibility
+    np.random.seed(random_state_classifier)
+
+    # Convert the bootstrap resampling proportion to the number
+    # of rows to resample from the training data
+    n_samples = ceil(propn_n_samples * X_train.shape[0])
+
+    # All Random Forest data
+    all_K_iter_rf_data = {}
+
+    # Initialize dictionary of rf weights
+    # CHECK: change this name to be `all_rf_weights_output`
+    all_rf_weights = {}
+
+    # Initialize dictionary of bootstrap rf output
+    all_rf_bootstrap_output = {}
+
+    # Initialize dictionary of bootstrap RIT output
+    all_rit_bootstrap_output = {}
+
+    for k in range(K):
+        if k == 0:
+
+            # Initially feature weights are None
+            feature_importances = None
+
+            # Update the dictionary of all our RF weights
+            all_rf_weights["rf_weight{}".format(k)] = feature_importances
+
+            # fit RF feature weights i.e. initially None
+            rf = RandomForestClassifier(n_estimators=n_estimators)
+
+            # fit the classifier
+            rf.fit(
+                X=X_train,
+                y=y_train,
+                feature_weight=all_rf_weights["rf_weight{}".format(k)])
+
+            # Update feature weights using the
+            # new feature importance score
+            feature_importances = rf.feature_importances_
+
+            # Load the weights for the next iteration
+            all_rf_weights["rf_weight{}".format(k + 1)] = feature_importances
+
+        else:
+            # fit weighted RF
+            # Use the weights from the previous iteration
+            rf = RandomForestClassifier(n_estimators=n_estimators)
+
+            # fit the classifier
+            rf.fit(
+                X=X_train,
+                y=y_train,
+                feature_weight=all_rf_weights["rf_weight{}".format(k)])
+
+            # Update feature weights using the
+            # new feature importance score
+            feature_importances = rf.feature_importances_
+
+            # Load the weights for the next iteration
+            all_rf_weights["rf_weight{}".format(k + 1)] = feature_importances
+
+        all_K_iter_rf_data["rf_iter{}".format(k)] = get_rf_tree_data(
+            rf=rf,
+            X_train=X_train,
+            X_test=X_test,
+            y_test=y_test)
+
+    # Run the RITs
+    for b in range(B):
+
+        # Take a bootstrap sample from the training data
+        # based on the specified user proportion
+        X_train_rsmpl, y_rsmpl = resample(
+            X_train, y_train, n_samples=n_samples)
+
+        # Set up the weighted random forest
+        # Using the weight from the (K-1)th iteration i.e. RF(w(K))
+        rf_bootstrap = RandomForestClassifier(
+            #CHECK: different number of trees to fit for bootstrap samples
+            n_estimators=n_estimators_bootstrap)
+
+        # Fit RF(w(K)) on the bootstrapped dataset
+        rf_bootstrap.fit(
+            X=X_train_rsmpl,
+            y=y_rsmpl,
+            feature_weight=all_rf_weights["rf_weight{}".format(K)])
+
+        # All RF tree data
+        # CHECK: why do we need y_train here?
+        all_rf_tree_data = get_rf_tree_data(
+            rf=rf_bootstrap,
+            X_train=X_train_rsmpl,
+            X_test=X_test,
+            y_test=y_test)
+
+        # Update the rf bootstrap output dictionary
+        all_rf_bootstrap_output['rf_bootstrap{}'.format(b)] = all_rf_tree_data
+
+        # Run RIT on the interaction rule set
+        # CHECK - each of these variables needs to be passed into
+        # the main run_rit function
+        all_rit_tree_data = get_rit_tree_data(
+            all_rf_tree_data=all_rf_tree_data,
+            bin_class_type=bin_class_type,
+            M=M,
+            max_depth=max_depth,
+            noisy_split=noisy_split,
+            num_splits=num_splits)
+
+        # Update the rf bootstrap output dictionary
+        # We will reference the RIT for a particular rf bootstrap
+        # using the specific bootstrap id - consistent with the
+        # rf bootstrap output data
+        all_rit_bootstrap_output['rf_bootstrap{}'.format(
+            b)] = all_rit_tree_data
+
+    stability_score = _get_stability_score(
+        all_rit_bootstrap_output=all_rit_bootstrap_output)
+
+    return all_rf_weights, all_K_iter_rf_data, all_rf_bootstrap_output, all_rit_bootstrap_output, stability_score
