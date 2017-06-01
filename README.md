@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Yu-Group/scikit-learn-sandbox.svg?branch=master)](https://travis-ci.org/Yu-Group/scikit-learn-sandbox)
+
 # scikit-learn-sandbox
 This is a sandbox repo to test out various scikit-learn features that will be used in the development of the iterative Random Forests (iRF) implementation.
 
