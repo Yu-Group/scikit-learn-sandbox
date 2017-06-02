@@ -227,9 +227,18 @@ def test_rit_interactions():
                               'rit3': {'rit_intersected_values': [np.array([1, 2, 3]), np.array([1, 2, 3, 4])]},
                               'rit4': {'rit_intersected_values': [np.array([1, 2, 3]), np.array([1, 2, 3])]}
                               }
-
     output = irf_utils.rit_interactions(all_rit_tree_data_test)
 
-    assert(list(output.keys()) == ['1_2_3', '1_2', '1_2_3_4', '5_6'])
-    assert(list(output.values()) == [5, 2, 2, 1])
-    
+    L1 = output.keys()
+    L2 = output.values()
+
+    L3 = ['1_2_3', '1_2', '1_2_3_4', '5_6']
+    L4 = [5, 2, 2, 1]
+    output_test = dict(zip(L3, L4))
+
+    # check keys
+    assert(len(L1) == len(L3) and sorted(L1) == sorted(L3))
+
+    # check values
+    for key in output.keys():
+        assert(output[key] == output_test[key])
