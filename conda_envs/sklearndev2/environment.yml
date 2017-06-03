@@ -1,0 +1,28 @@
+name: sklearndev2
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3
+  - cython
+  - graphviz
+  - numpy==1.9.3
+  - scipy==0.16.0
+  - pip
+  - jupyter_contrib_nbextensions
+  - pandas
+  - matplotlib
+  - feather-format
+  - pip:
+      - nose-timer
+      - wheelhouse_uploader
+      - yapf
+      - nose
+      - Wheel
+      - jupyter
+      - pandas
+      - matplotlib
+      - pillow
+      - graphviz
+      - pydotplus
+      - jupyterthemes
