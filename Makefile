@@ -12,6 +12,9 @@ conda_dev0:
 conda_dev1:
 	conda env create -f=./conda_envs/sklearndev1/environment.yml
 
+conda_dev2:
+	conda env create -f=./conda_envs/sklearndev2/environment.yml
+
 conda_prod0:
 	conda env create -f=./conda_envs/sklearnprod0/environment.yml
 

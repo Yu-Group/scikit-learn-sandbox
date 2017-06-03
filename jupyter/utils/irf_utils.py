@@ -854,9 +854,10 @@ def _get_stability_score(all_rit_bootstrap_output):
         rit_counts = list(rit_counts.keys())
         bootstrap_interact.append(rit_counts)
 
-    flatten = lambda l: [item for sublist in l for item in sublist]
+    def flatten(l): return [item for sublist in l for item in sublist]
     all_rit_interactions = flatten(bootstrap_interact)
-    stability = {m:all_rit_interactions.count(m)/B for m in all_rit_interactions}
+    stability = {m: all_rit_interactions.count(
+        m) / B for m in all_rit_interactions}
     return stability
 
 
@@ -927,7 +928,8 @@ def run_iRF(X_train,
         random variable
 
     n_estimators_bootstrap : int, optional (default = 5)
-        The number of trees in the random forest when fitting to bootstrap samples
+        The number of trees in the random forest when
+        fitting to bootstrap samples
 
     Returns
     --------
@@ -1025,7 +1027,7 @@ def run_iRF(X_train,
         # Set up the weighted random forest
         # Using the weight from the (K-1)th iteration i.e. RF(w(K))
         rf_bootstrap = RandomForestClassifier(
-            #CHECK: different number of trees to fit for bootstrap samples
+            # CHECK: different number of trees to fit for bootstrap samples
             n_estimators=n_estimators_bootstrap)
 
         # Fit RF(w(K)) on the bootstrapped dataset
@@ -1068,23 +1070,28 @@ def run_iRF(X_train,
 
     return all_rf_weights, all_K_iter_rf_data, all_rf_bootstrap_output, all_rit_bootstrap_output, stability_score
 
-def _hist_features(all_rf_tree_data, n_estimators, \
-                   xlabel = 'features', ylabel = 'frequency', title = 'Frequency of features along decision paths'): 
+
+def _hist_features(all_rf_tree_data, n_estimators,
+                   xlabel='features',
+                   ylabel='frequency',
+                   title='Frequency of features along decision paths'):
     """
-    Generate histogram of number of appearances a feature appeared along a decision path in the forest
+    Generate histogram of number of appearances a feature appeared
+    along a decision path in the forest
     """
 
     all_features = []
 
     for i in range(n_estimators):
-        tree_id = 'dtree'+str(i)
+        tree_id = 'dtree' + str(i)
 
-        a = np.concatenate(all_rf_tree_data[tree_id]['all_uniq_leaf_paths_features'])
+        a = np.concatenate(
+            all_rf_tree_data[tree_id]['all_uniq_leaf_paths_features'])
         all_features.append(a)
 
     all_features = np.concatenate(all_features)
 
-    counts = {m:np.sum(all_features == m) for m in all_features}
+    counts = {m: np.sum(all_features == m) for m in all_features}
     data_y = sorted(counts.values(), reverse=True)
     data_x = sorted(counts, key=counts.get, reverse=True)
     plt.figure(figsize=(15, 8))
@@ -1095,5 +1102,3 @@ def _hist_features(all_rf_tree_data, n_estimators, \
     plt.ylabel(ylabel)
     plt.title(title)
     plt.show()
-
-
