@@ -10,8 +10,11 @@ from sklearn.datasets import load_breast_cancer
 
 
 def generate_rf_example(sklearn_ds=load_breast_cancer(),
-                        train_split_propn=0.9, n_estimators=3, feature_weight = None,
-                        random_state_split=2017, random_state_classifier=2018):
+                        train_split_propn=0.9,
+                        n_estimators=3,
+                        feature_weight=None,
+                        random_state_split=2017,
+                        random_state_classifier=2018):
     """
     This fits a random forest classifier to the breast cancer/ iris datasets
     This can be called from the jupyter notebook so that analysis
@@ -30,7 +33,7 @@ def generate_rf_example(sklearn_ds=load_breast_cancer(),
     n_estimators : int, optional (default=10)
         The index of the root node of the tree. Should be set as default to
         3 and not changed by the user
-        
+
     feature_weight : list, optional (default=None)
         The chance of splitting at each feature.
 
@@ -82,9 +85,9 @@ def generate_rf_example(sklearn_ds=load_breast_cancer(),
     # Just fit a simple random forest classifier with 2 decision trees
     rf = RandomForestClassifier(
         n_estimators=n_estimators, random_state=random_state_classifier)
-    
+
     # fit the classifier
-    if feature_weight==None:
+    if feature_weight is None:
         rf.fit(X=X_train, y=y_train)
     else:
         rf.fit(X=X_train, y=y_train, feature_weight=feature_weight)
@@ -185,7 +188,6 @@ def draw_tree(decision_tree, out_file=None, filled=True, rounded=False,
 
 
 def pretty_print_dict(inp_dict, indent_val=4):
-
     """
     This is used to pretty print the dictionary
     this is particularly useful for printing the dictionary of outputs
