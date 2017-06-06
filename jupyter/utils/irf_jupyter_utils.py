@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+from __future__ import division
+
+import matplotlib.pyplot as plt
 import pydotplus
 import pprint
 from sklearn import tree
@@ -7,6 +10,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from IPython.display import display, Image
 from sklearn.datasets import load_breast_cancer
+
+# CHECK: Ensure that the following list/emails is correct
+# Authors:
+#
+#
+#
+# CHECK: License is correct
+# License: BSD 3 clause
+
+# =============================================================================
+# Generate sample Random Forest Data
+# =============================================================================
 
 
 def generate_rf_example(sklearn_ds=load_breast_cancer(),
@@ -93,6 +108,11 @@ def generate_rf_example(sklearn_ds=load_breast_cancer(),
         rf.fit(X=X_train, y=y_train, feature_weight=feature_weight)
 
     return X_train, X_test, y_train, y_test, rf
+
+
+# =============================================================================
+# Draw a single random forest decision tree in jupyter
+# =============================================================================
 
 
 def draw_tree(decision_tree, out_file=None, filled=True, rounded=False,
@@ -187,14 +207,96 @@ def draw_tree(decision_tree, out_file=None, filled=True, rounded=False,
     display(img)
 
 
+# =============================================================================
+# Histogram and Plotting functions for Random Intersection Trees (RITs)
+# and Decision Trees
+# =============================================================================
+
+
+def _get_histogram(interact_counts, xlabel='interaction',
+                   ylabel='stability',
+                   sort=False):
+    """
+    Helper function to plot the histogram from a dictionary of
+    count data
+
+    Paremeters
+    -------
+    interact_counts : dict
+        counts of interactions as outputed from the 'rit_interactions' function
+
+    xlabel : str, optional (default = 'interaction')
+        label on the x-axis
+
+    ylabel : str, optional (default = 'counts')
+        label on the y-axis
+
+    sorted : boolean, optional (default = 'False')
+        If True, sort the histogram from interactions with highest frequency
+        to interactions with lowest frequency
+    """
+
+    if sort:
+        data_y = sorted(interact_counts.values(), reverse=True)
+        data_x = sorted(interact_counts, key=interact_counts.get,
+                        reverse=True)
+    else:
+        data_x = interact_counts.keys()
+        data_y = interact_counts.values()
+
+    plt.figure(figsize=(15, 8))
+    plt.clf()
+    plt.bar(np.arange(len(data_x)), data_y, align='center', alpha=0.5)
+    plt.xticks(np.arange(len(data_x)), data_x, rotation='vertical')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.show()
+
+
+def _hist_features(all_rf_tree_data, n_estimators,
+                   xlabel='features',
+                   ylabel='frequency',
+                   title='Frequency of features along decision paths'):
+    """
+    Generate histogram of number of appearances a feature appeared
+    along a decision path in the forest
+    """
+
+    all_features = []
+
+    for i in range(n_estimators):
+        tree_id = 'dtree' + str(i)
+
+        a = np.concatenate(
+            all_rf_tree_data[tree_id]['all_uniq_leaf_paths_features'])
+        all_features.append(a)
+
+    all_features = np.concatenate(all_features)
+
+    counts = {m: np.sum(all_features == m) for m in all_features}
+    data_y = sorted(counts.values(), reverse=True)
+    data_x = sorted(counts, key=counts.get, reverse=True)
+    plt.figure(figsize=(15, 8))
+    plt.clf()
+    plt.bar(np.arange(len(data_x)), data_y, align='center', alpha=0.5)
+    plt.xticks(np.arange(len(data_x)), data_x, rotation='vertical')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.show()
+
+
+# =============================================================================
+# Pretty Print Dictionary in jupyter notebook
+# =============================================================================
 def pretty_print_dict(inp_dict, indent_val=4):
     """
-    This is used to pretty print the dictionary
-    this is particularly useful for printing the dictionary of outputs
-    from each decision tree
+     This is used to pretty print the dictionary
+     this is particularly useful for printing the dictionary of outputs
+     from each decision tree
 
     Parameters
-    ----------
+        ----------
         inp_dict : dictionary
         Any python dictionary to be displayed in a pretty format
 
@@ -203,7 +305,7 @@ def pretty_print_dict(inp_dict, indent_val=4):
         by default
 
     Returns
-    -------
+        -------
         A pretty printed dictionary output. This is best run inside a
         jupyter notebook.
 
