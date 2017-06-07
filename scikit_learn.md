@@ -11,40 +11,58 @@ well tested `sandbox` code to our `scikit-learn` fork.
 4. `cd scikit-learn`
 5. `git remote add upstream git@github.com:Yu-Group/scikit-learn.git`
   - **Yu Group** fork of scikit-learn
-6. `git remote add stefanv git@github.com:stefanv/scikit-learn.git`
+5. `git remote add stefanv git@github.com:stefanv/scikit-learn.git`
   - **Stefan's** fork of scikit-learn
+5. `git remote add shamindras git@github.com:shamindras/scikit-learn.git`
+  - **Shamindra's** fork of scikit-learn
+5. `git remote add Runjing-Liu120 git@github.com:Runjing-Liu120/scikit-learn.git`
+  - **Bryan's** fork of scikit-learn
 7. `git remote add prod https://github.com/scikit-learn/scikit-learn`
   - **Main** scikit-learn repo
 8. `git remote -v`
   - This should display the following in the terminal:
   ```
-origin	git@github.com:shamindras/scikit-learn.git (fetch)
-origin	git@github.com:shamindras/scikit-learn.git (push)
-prod	https://github.com/scikit-learn/scikit-learn (fetch)
-prod	https://github.com/scikit-learn/scikit-learn (push)
-stefanv	git@github.com:stefanv/scikit-learn.git (push)
-stefanv	git@github.com:stefanv/scikit-learn.git (fetch)
-upstream	git@github.com:Yu-Group/scikit-learn.git (fetch)
-upstream	git@github.com:Yu-Group/scikit-learn.git (push)
+  Runjing-Liu120	git@github.com:Runjing-Liu120/scikit-learn.git (fetch)
+  Runjing-Liu120	git@github.com:Runjing-Liu120/scikit-learn.git (push)
+  origin	git@github.com:shamindras/scikit-learn.git (fetch)
+  origin	git@github.com:shamindras/scikit-learn.git (push)
+  prod	https://github.com/scikit-learn/scikit-learn (fetch)
+  prod	https://github.com/scikit-learn/scikit-learn (push)
+  shamindras	git@github.com:shamindras/scikit-learn.git (fetch)
+  shamindras	git@github.com:shamindras/scikit-learn.git (push)
+  shifwang	git@github.com:shifwang/scikit-learn.git (fetch)
+  shifwang	git@github.com:shifwang/scikit-learn.git (push)
+  stefanv	git@github.com:stefanv/scikit-learn.git (fetch)
+  stefanv	git@github.com:stefanv/scikit-learn.git (push)
   ```
-9. `git fetch stefanv`
-  - get all of stefanv's committed branches
-10. `git checkout feature_weighted_split`
-  - Checkout the `feature_weighted_split` that stefanv committed, which we
+9. `git fetch shamindras`
+  - get all of shamindras committed branches
+10. `git checkout feature_weight`
+  - Checkout the `feature_weight` that shamindras recently committed     (includes commits from stefanv and shifwang), which we
     just pulled down to our local machine
-11. `make conda_dev0`
+10. `git merge shamindras/feature_weight`
+  - MRG the `feature_weight` that shamindras committed, which we
+    just pulled down to our local machine
+11. `make conda_dev2`
   - installs the development conda environment
 
 ## Regular commit Cycle
 Assuming you have completed **steps 1-8** above:
-1. `source activate sklearndev0`
+1. `source activate sklearndev2`
   - Activate the development conda environment
-2. `git checkout git checkout feature_weighted_split`
-  - Checkout branch with stefanv's changes implemented
+2. `cd ../scikit-learn`
+  - This should be the directory where your local clone of the `scikit-learn` forked repo is
+  - This clone was done in the steps above
+2. `git checkout feature_weight`
+  - Checkout branch with shamindras changes implemented
 2. `pip install -e .`
 3. `make cython`
-4. Make changes and commit to branch
+4. Make changes and commit to branch, you can also run `jupyter` notebooks in
+   this mode
 5. `make cython`
-6. `git push -f origin feature_weighted_split`
+6. `pip install -e .`
+6. `git push -f **your-gh-username** feature_weight`
   - This will create the required pull request (PR)
-6. Wait for code review on your PR and then make changes and repeat steps **4-6** onwards
+7. Wait for code review on your PR and then make changes and repeat steps **4-6** onwards
+8. You can also `cd ../scikit-learn-sandbox` and run jupyter notebooks now!
+  - The `irf_utils` are now in scikit-learn
