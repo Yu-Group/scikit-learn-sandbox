@@ -26,6 +26,7 @@ Or to install them **individually** you can run the following commands separatel
 ```bash
 make conda_dev0
 make conda_dev1
+make conda_dev2
 make conda_prod0
 ```
 
@@ -34,15 +35,17 @@ To confirm that the conda environments have installed correctly you can run the 
 conda info -e
 ```
 
-You should now see the 3 installed environments listed as required `sklearndev0`, `sklearndev1` and `sklearnprod0`.
+You should now see the 3 installed environments listed as required `sklearndev0`, `sklearndev1`, `sklearndev2` and `sklearnprod0`.
 
-To **activate** the conda environments simply use conda as usual i.e. `source activate sklearndev0`
+To **activate** the conda environments simply use conda as usual i.e. `source activate sklearndev2`
 
 ### Quick info on each of the conda environments
 
 `sklearndev0` : Is built to mirror [scikit learn dev requirements.txt](https://github.com/scikit-learn/scikit-learn/blob/master/build_tools/appveyor/requirements.txt). Useful for our scikit-learn development.
 
 `sklearndev1` : Same as `sklearndev0` but includes pandas and jupyter notebook for additional interactive testing
+
+`sklearndev1` : Same as `sklearndev2` but includes pandas and jupyter notebook and `feather` for additional interactive testing
 
 `sklearnprod0`: This contains the latest conda **production** `scikit-learn` build and is useful for current production testing of `sklearn`
 
@@ -113,5 +116,3 @@ git rebase master # sync branch with upstream master
 11. Ask the reviewer to review as required. For all code review changes requested, just repeat **step 7** onwards until reviewer is satisfied
 12. Once all changes are put in - the reviewer can merge the changes in upstream master
 13. Then start a new issue from **Step 1** onwards!
-
-Bryan playing with Github test

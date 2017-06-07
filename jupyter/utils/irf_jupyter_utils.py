@@ -5,6 +5,7 @@ from __future__ import division
 import matplotlib.pyplot as plt
 import pydotplus
 import pprint
+import numpy as np
 from sklearn import tree
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
