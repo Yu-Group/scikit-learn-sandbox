@@ -195,12 +195,20 @@ def iRF_benchmarks(features, responses, n_trials=10,
         metrics_summary[k] = \
             [np.mean(metrics_all[k], 0), np.std(metrics_all[k], 0)]
 
-    return(metrics_all, metrics_summary, stability_all, feature_importances)
+    iRF_bm = {'metrics_all': metrics_all,
+                'metrics_summary': metrics_summary,
+                'stability_all': stability_all,
+                'feature_importances': feature_importances}
+
+    return(iRF_bm)
 
 def consolidate_bm_RF(features, responses, specs, seed = None):
 
+    np.random.seed(seed)
+
     # figure out which parameter is being looped over
     # there should only be one parameter to be looped over
+    # i.e. only one element of the "specs" dictionary should be a list
     err_1param = 0
     for k in specs.keys():
         if np.max(np.shape([specs[k]])) > 1:
@@ -252,15 +260,90 @@ def consolidate_bm_RF(features, responses, specs, seed = None):
                       n_trials=specs['n_trials'][i],
                       train_split_propn=specs['train_split_propn'][i],
                       n_estimators=specs['n_estimators'][i],
-                      seed=seed)
+                      seed=None)
     return(rf_bm)
 
 
-def plot_bm_RF(rf_bm, specs, param, metric):
+def consolidate_bm_iRF(features, responses, specs, seed = None):
+
+    # figure out which parameter is being looped over
+    # there should only be one parameter to be looped over
+    # i.e. only one element of the "specs" dictionary should be a list
+    err_1param = 0
+    for k in specs.keys():
+        if np.max(np.shape([specs[k]])) > 1:
+            print(k)
+            loop_spec = k
+            err_1param += 1
+
+    assert(err_1param <= 1) # should only be one parameter being looped over
+
+    # replicate keys
+    if err_1param == 0:
+        loop_spec = 'n_trials'
+        specs[loop_spec] = list([specs[loop_spec]]) * \
+            np.max(np.shape([specs[loop_spec]]))
+
+    n_loops = np.max(np.shape([specs[loop_spec]]))
+
+    print(specs[loop_spec])
+
+    for k in specs.keys():
+        if k != loop_spec:
+            specs[k] = list([specs[k]]) * n_loops
+    print(specs)
+
+    iRF_bm = {}
+
+    for i in range(n_loops):
+        # subsample data if n parameter is passed
+        N = np.shape(features)[0]
+        P = np.shape(features)[1]
+        if specs['N_obs'][i] != N:
+            indx = np.random.choice(N, specs['N_obs'], replace = False)
+            features_subset = features[indx, :]
+            responses_subset = responses[indx, :]
+        else:
+            features_subset = features
+            responses_subset = responses
+
+        # subsample features if p parameter is passed
+        if specs['N_features'][i] != P:
+            indx = np.random.choice(P, specs['N_features'], replace = False)
+            features_subset = features[:, indx]
+            responses_subset = responses[:, indx]
+        else:
+            features_subset = features
+            responses_subset = responses
+
+        iRF_bm[i] = iRF_benchmarks(features_subset, responses_subset,
+                        n_trials=specs['n_trials'][i],
+                           K=specs['n_iter'][i],
+                           train_split_propn=specs['train_split_propn'][i],
+                           n_estimators=specs['n_estimators'][i],
+                           B=specs['n_bootstraps'][i],
+                           propn_n_samples=specs['propn_n_samples'][i],
+                           bin_class_type=specs['bin_class_type'][i],
+                           M=specs['n_RIT'][i],
+                           max_depth=specs['max_depth'][i],
+                           noisy_split=specs['noisy_split'][i],
+                           num_splits=specs['num_splits'][i],
+                           n_estimators_bootstrap=specs['n_estimators_bootstrap'][i],
+                           seed=seed)
+    return(iRF_bm)
+
+
+
+
+
+
+
+
+def plot_bm(bm, specs, param, metric):
     x = specs[param]
-    y = [rf_bm[i]['metrics_summary'][metric][0] \
+    y = [bm[i]['metrics_summary'][metric][0] \
                 for i in range(len(specs[param]))]
-    sd = [rf_bm[i]['metrics_summary'][metric][1] \
+    sd = [bm[i]['metrics_summary'][metric][1] \
                 for i in range(len(specs[param]))]
 
     plt.clf()
