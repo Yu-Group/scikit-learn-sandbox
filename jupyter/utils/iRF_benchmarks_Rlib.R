@@ -129,7 +129,6 @@ iRF_benchmarks <- function(features, responses, n_trials=10,
            stability_all[[i]] <- ff$interaction[[K]]
            }
 
-
        metrics_all <- list(times = t_iRF, score = score)
 
        metrics_summary <- lapply(metrics_all, function(x){c(mean(x), sd(x))})
