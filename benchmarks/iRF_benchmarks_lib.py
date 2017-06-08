@@ -3,12 +3,17 @@ import numpy as np
 import time
 
 import matplotlib.pyplot as plt
+import os
+import yaml
 
 from sklearn import tree
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from IPython.display import display, Image
 from sklearn.datasets import load_breast_cancer
+
+import sys
+sys.path.insert(0, '../jupyter')
 
 # Import our custom utilities
 from imp import reload
@@ -410,4 +415,3 @@ def dict_to_yaml(inp_dict, out_yaml_dir, out_yaml_name):
     # Write out the yaml file to the specified path
     with open(out_yaml_path, 'w') as outfile:
         yaml.dump(inp_dict, outfile, default_flow_style=False)
-
