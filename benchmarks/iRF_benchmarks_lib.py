@@ -332,13 +332,6 @@ def consolidate_bm_iRF(features, responses, specs, seed = None):
                            seed=seed)
     return(iRF_bm)
 
-
-
-
-
-
-
-
 def plot_bm(bm, specs, param, metric):
     x = specs[param]
     y = [bm[i]['metrics_summary'][metric][0] \
@@ -351,3 +344,70 @@ def plot_bm(bm, specs, param, metric):
     plt.xlabel(param )
     plt.ylabel(metric)
     plt.show()
+
+
+# =============================================================================
+# Read in yaml file as a Python dictionary
+# =============================================================================
+
+
+def yaml_to_dict(inp_yaml):
+    """ Helper function to read in a yaml file into
+        Python as a dictionary
+
+    Parameters
+    ----------
+    inp_yaml : str
+        A yaml text string containing to be parsed into a Python
+        dictionary
+
+    Returns
+    -------
+    out : dict
+        The input yaml string parsed as a Python dictionary object
+    """
+    with open(inp_yaml, 'r') as stream:
+        try:
+            out = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+    return out
+
+# =============================================================================
+# Convert Python dictionary to yaml
+# =============================================================================
+
+
+def dict_to_yaml(inp_dict, out_yaml_dir, out_yaml_name):
+    """ Helper function to convert Python dictionary
+        into a yaml string file
+
+    Parameters
+    ----------
+    inp_dict: dict
+        The Python dictionary object to be output as a yaml file
+
+    out_yaml_dir : str
+        The output directory for yaml file created
+
+    out_yaml_name : str
+        The output filename for yaml file created
+        e.g. for 'test.yaml' just set this value to 'test'
+             the '.yaml' will be added by the function
+
+    Returns
+    -------
+    out : str
+        The yaml file with specified name and directory from
+        the input Python dictionary
+    """
+    if not os.path.exists(out_yaml_dir):
+        os.makedirs(out_yaml_dir)
+
+    out_yaml_path = os.path.join(out_yaml_dir,
+                                 out_yaml_name) + '.yaml'
+
+    # Write out the yaml file to the specified path
+    with open(out_yaml_path, 'w') as outfile:
+        yaml.dump(inp_dict, outfile, default_flow_style=False)
+
