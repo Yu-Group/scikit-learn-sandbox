@@ -3,12 +3,18 @@ The following code will be used when we migrate our
 well tested `sandbox` code to our `scikit-learn` fork.
 
 ## One-time-only Setup
+1. Goto: [here](https://github.com/Yu-Group/scikit-learn-sandbox/blob/master/README.md#git-github-workflow) to fork the scikit-learn-sandbox repo
+2. Goto: [here](https://github.com/Yu-Group/scikit-learn-sandbox/blob/master/README.md#basic-setup--installation) to create the conda environments:
+  - In particular you should run `make conda_dev2`
+  - This will create  `sklearndev2` which is the main environment
+    required to run the scikit-learn fork version of iRF
 1. Goto: https://github.com/Yu-Group/scikit-learn
 2. Fork the repo to your personal github i.e. it will create:
   - https://github.com/**your-gh-username**/scikit-learn
 3. `git clone git@github.com:**your-gh-username**/scikit-learn.git`
-  - clone the forked repo in 2
+  - clone the forked repo on your local machine
 4. `cd scikit-learn`
+  - Now we are ready to set up the remote repos of our team
 5. `git remote add upstream git@github.com:Yu-Group/scikit-learn.git`
   - **Yu Group** fork of scikit-learn
 5. `git remote add stefanv git@github.com:stefanv/scikit-learn.git`
@@ -38,27 +44,24 @@ well tested `sandbox` code to our `scikit-learn` fork.
 9. `git fetch shamindras`
   - get all of shamindras committed branches
 10. `git checkout feature_weight`
-  - Checkout the `feature_weight` that shamindras recently committed     (includes commits from stefanv and shifwang), which we
+  - Checkout the `feature_weight` that `shamindras` recently committed     (includes commits from `stefanv` and `shifwang`), which we
     just pulled down to our local machine
 10. `git merge shamindras/feature_weight`
-  - MRG the `feature_weight` that shamindras committed, which we
+  - MRG the `feature_weight` that `shamindras` committed, which we
     just pulled down to our local machine
-11. `make conda_dev2`
-  - installs the development conda environment
 
-## Regular commit Cycle
+## Regular commit Cycle (in your `scikit-learn` fork)
 Assuming you have completed **steps 1-8** above:
 1. `source activate sklearndev2`
   - Activate the development conda environment
-2. `cd ../scikit-learn`
+2. `cd path to/scikit-learn`
   - This should be the directory where your local clone of the `scikit-learn` forked repo is
   - This clone was done in the steps above
 2. `git checkout feature_weight`
   - Checkout branch with shamindras changes implemented
 2. `pip install -e .`
 3. `make cython`
-4. Make changes and commit to branch, you can also run `jupyter` notebooks in
-   this mode
+4. Make changes and commit to branch, you can also run `jupyter` notebooks in this mode
 5. `make cython`
 6. `pip install -e .`
 6. `git push -f **your-gh-username** feature_weight`
