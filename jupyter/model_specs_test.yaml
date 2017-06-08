@@ -1,0 +1,5 @@
+n_trials: 10
+n_estimators: [20]
+train_split_propn: 0.8
+N_obs: [2000, 3000, 4000]
+N_features: [10, 40, 70]
