@@ -93,8 +93,6 @@ iRF_benchmarks <- function(features, responses, n_trials=10,
           randomForest(x=as.matrix(features[training_index, ]), y=as.factor(responses[training_index]), ntree=20)
        }
 
-
-
        t_iRF <- rep(0,n_trials)
        score <- rep(0,n_trials)
        OOB_error <- rep(0,n_trials)
