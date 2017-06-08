@@ -92,7 +92,9 @@ def RF_benchmarks(features, responses,
         metrics_summary[k] = \
             [np.mean(metrics_all[k], 0), np.std(metrics_all[k], 0)]
 
-    return(metrics_all, metrics_summary, feature_importances)
+    rf_bm = {'metrics_all' : metrics_all, 'metrics_summary': metrics_summary,
+            'feature_importances': feature_importances}
+    return(rf_bm)
 
 
 def iRF_benchmarks(features, responses, n_trials=10,
@@ -194,3 +196,75 @@ def iRF_benchmarks(features, responses, n_trials=10,
             [np.mean(metrics_all[k], 0), np.std(metrics_all[k], 0)]
 
     return(metrics_all, metrics_summary, stability_all, feature_importances)
+
+def consolidate_bm_RF(features, responses, specs, seed = None):
+
+    # figure out which parameter is being looped over
+    # there should only be one parameter to be looped over
+    err_1param = 0
+    for k in specs.keys():
+        if np.max(np.shape([specs[k]])) > 1:
+            print(k)
+            loop_spec = k
+            err_1param += 1
+
+    assert(err_1param <= 1) # should only be one parameter being looped over
+
+    # replicate keys
+    if err_1param == 0:
+        loop_spec = 'n_trials'
+        specs[loop_spec] = list([specs[loop_spec]]) * \
+            np.max(np.shape([specs[loop_spec]]))
+
+    n_loops = np.max(np.shape([specs[loop_spec]]))
+
+    print(specs[loop_spec])
+
+    for k in specs.keys():
+        if k != loop_spec:
+            specs[k] = list([specs[k]]) * n_loops
+    print(specs)
+
+    rf_bm = {}
+
+    for i in range(n_loops):
+        # subsample data if n parameter is passed
+        N = np.shape(features)[0]
+        P = np.shape(features)[1]
+        if specs['N_obs'][i] != N:
+            indx = np.random.choice(N, specs['N_obs'], replace = False)
+            features_subset = features[indx, :]
+            responses_subset = responses[indx, :]
+        else:
+            features_subset = features
+            responses_subset = responses
+
+        # subsample features if p parameter is passed
+        if specs['N_features'][i] != P:
+            indx = np.random.choice(P, specs['N_features'], replace = False)
+            features_subset = features[:, indx]
+            responses_subset = responses[:, indx]
+        else:
+            features_subset = features
+            responses_subset = responses
+
+        rf_bm[i] = RF_benchmarks(features_subset, responses_subset,
+                      n_trials=specs['n_trials'][i],
+                      train_split_propn=specs['train_split_propn'][i],
+                      n_estimators=specs['n_estimators'][i],
+                      seed=seed)
+    return(rf_bm)
+
+
+def plot_bm_RF(rf_bm, specs, param, metric):
+    x = specs[param]
+    y = [rf_bm[i]['metrics_summary'][metric][0] \
+                for i in range(len(specs[param]))]
+    sd = [rf_bm[i]['metrics_summary'][metric][1] \
+                for i in range(len(specs[param]))]
+
+    plt.clf()
+    plt.errorbar(x, y, yerr = sd)
+    plt.xlabel(param )
+    plt.ylabel(metric)
+    plt.show()
