@@ -20,6 +20,29 @@ from imp import reload
 from utils import irf_jupyter_utils
 from utils import irf_utils
 
+def check_path_exists(inp_path):
+    """
+    Check if the directory or filepath exists
+    Print clear message to the user if it does not exist else
+    return a True value (bool)
+
+    Parameters
+    ----------
+        inp_path: str
+            path of a filename or directory whose existence
+            is to be verified
+    """
+    if not os.path.exists(inp_path):
+        sys.exit('Directory {} does not exist! Check you are running this from the benchmarks directory'.format(inp_path))
+    else:
+        print(inp_path, True, sep=': ')
+        #
+
+
+# =============================================================================
+# Run the RF benchmarks
+# =============================================================================
+
 
 def RF_benchmarks(features, responses,
                   n_trials=10,
@@ -27,11 +50,11 @@ def RF_benchmarks(features, responses,
                   n_estimators=20,
                   seed=2017):
     """
-    Run RF benchmarks
+        Run RF benchmarks
 
     Parameters
-    ----------
-    n_trials : int, optional (default = 10)
+        ----------
+        n_trials : int, optional (default = 10)
         Number of times to run RF
 
     train_test_split : float, int, optional (default  = 0.8)
@@ -46,8 +69,8 @@ def RF_benchmarks(features, responses,
         ranodm seed for reproducibility
 
     Output
-    ----------
-    metrics_all : dict
+        ----------
+        metrics_all : dict
         dictionary containing the metrics from all trials
 
     metrics_summary : dict
@@ -56,8 +79,7 @@ def RF_benchmarks(features, responses,
 
     feature_importances : dict
         dictionary containing feature importances from all trials
-
-    """
+        """
 
     # set seed
     np.random.seed(seed)
@@ -410,7 +432,7 @@ def dict_to_yaml(inp_dict, out_yaml_dir, out_yaml_name):
         os.makedirs(out_yaml_dir)
 
     out_yaml_path = os.path.join(out_yaml_dir,
-                                 out_yaml_name) + '.yaml'
+                                 out_yaml_name)
 
     # Write out the yaml file to the specified path
     with open(out_yaml_path, 'w') as outfile:
