@@ -432,7 +432,7 @@ def dict_to_yaml(inp_dict, out_yaml_dir, out_yaml_name):
         os.makedirs(out_yaml_dir)
 
     out_yaml_path = os.path.join(out_yaml_dir,
-                                 out_yaml_name) + '.yaml'
+                                 out_yaml_name)
 
     # Write out the yaml file to the specified path
     with open(out_yaml_path, 'w') as outfile:

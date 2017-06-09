@@ -53,9 +53,9 @@ print(responses[0:10])
 output_name = args.fname_yaml_specs + "_out.yaml"
 print(output_name)
 
-#rf_bm = py_irf_benchmarks.consolidate_bm_iRF(\
-    #    features, responses, specs, seed = None)
+rf_bm = py_irf_benchmarks.consolidate_bm_iRF(features, responses,
+                                             inp_specs, seed = None)
 
-#py_irf_benchmarks.dict_to_yaml(inp_dict=rf_bm,
-#out_yaml_dir= OUTPUT_DIR,
-#out_yaml_name=args.output_name)
+py_irf_benchmarks.dict_to_yaml(inp_dict=rf_bm,
+                               out_yaml_dir= OUTPUT_DIR,
+                               out_yaml_name=output_name)
