@@ -6,8 +6,8 @@ dependencies:
   - python=3
   - cython
   - graphviz
-  - numpy==1.9.3
-  - scipy==0.16.0
+  - numpy
+  - scipy
   - pip
   - jupyter_contrib_nbextensions
   - pandas
