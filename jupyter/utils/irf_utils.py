@@ -326,6 +326,7 @@ def get_tree_data(X_train, X_test, y_test, dtree, root_node_id=0):
     # Get the refined non-negative feature indices for each node
     # Start with a range over the total number of features and
     # subset the relevant indices from the raw indices array
+    print(np.array(node_features_raw_idx))
     node_features_idx = all_features_idx[np.array(node_features_raw_idx)]
 
     # Count the unique number of features used

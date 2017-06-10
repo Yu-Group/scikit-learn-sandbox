@@ -12,6 +12,9 @@ from sklearn.ensemble import RandomForestClassifier
 from IPython.display import display, Image
 from sklearn.datasets import load_breast_cancer
 
+import itertools
+from copy import deepcopy
+
 import sys
 sys.path.insert(0, '../jupyter')
 
@@ -124,9 +127,8 @@ def RF_benchmarks(features, responses,
     return(rf_bm)
 
 
-def iRF_benchmarks(features, responses, n_trials=10,
+def get_iRF_benchmarks(X_train, X_test, y_train, y_test, n_trials=10,
                    K=5,
-                   train_split_propn=0.8,
                    n_estimators=20,
                    B=30,
                    propn_n_samples=.2,
@@ -136,7 +138,7 @@ def iRF_benchmarks(features, responses, n_trials=10,
                    noisy_split=False,
                    num_splits=2,
                    n_estimators_bootstrap=5,
-                   seed=2018):
+                   seed_classifier=None):
     """
     Run iRF benchmarks
 
@@ -162,13 +164,6 @@ def iRF_benchmarks(features, responses, n_trials=10,
 
     """
 
-    # set seed
-    np.random.seed(seed)
-
-    # split into testing and training
-    X_train, X_test, y_train, y_test = train_test_split(
-        features, responses, train_size=train_split_propn)
-
     iRF_time = np.array([])
     metrics_tmp = {}
     feature_importances = {}
@@ -177,6 +172,29 @@ def iRF_benchmarks(features, responses, n_trials=10,
     for i in range(n_trials):
         # run iRF and time
         t0 = time.time()
+
+        """        assert np.shape(X_train)[0] == np.shape(y_train)[0]
+        assert np.shape(X_test)[0] == np.shape(y_test)[0]
+
+        print(X_train)
+        print(y_train)
+
+        print(np.shape(X_train))
+        print(np.shape(y_train))
+
+        print(K)
+        print(n_estimators)
+        print(B)
+        print(seed_classifier)
+        print(propn_n_samples)
+        print(bin_class_type)
+        print(M)
+        print(max_depth)
+        print(noisy_split)
+        print(num_splits)
+        print(n_estimators_bootstrap)
+        print(n_trials)
+        """
         _, all_K_iter_rf_data, _, _, stability_score = \
             irf_utils.run_iRF(X_train=X_train,
                               X_test=X_test,
@@ -184,8 +202,8 @@ def iRF_benchmarks(features, responses, n_trials=10,
                               y_test=y_test,
                               K=K,
                               n_estimators=n_estimators,
-                              B=n_estimators,
-                              random_state_classifier=None,
+                              B=B,
+                              random_state_classifier=seed_classifier,
                               propn_n_samples=propn_n_samples,
                               bin_class_type=bin_class_type,
                               M=M,
@@ -291,72 +309,77 @@ def consolidate_bm_RF(features, responses, specs, seed = None):
     return(rf_bm)
 
 
-def consolidate_bm_iRF(features, responses, specs, seed = None):
+def parse_data(features, responses, train_split_propn = 0.8, \
+                N_obs = 'all', N_features = 'all', seed = None):
+    # split into testing and training
+    # subsamples data or features as specified
+
+    np.random.seed(seed)
+
+    # subsample data if N_obs parameter is passed
+    N = np.shape(features)[0]
+    P = np.shape(features)[1]
+
+    if N_obs == 'all':
+        features_subset = deepcopy(features)
+        responses_subset = deepcopy(responses)
+    else:
+        indx = np.random.choice(N, N_obs, replace = False)
+        features_subset = features[indx, :]
+        responses_subset = responses[indx, :]
+
+    # subsample features if p parameter is passed
+    if N_features == 'all':
+        features_subset = deepcopy(features)
+        responses_subset = deepcopy(responses)
+    else:
+        indx = np.random.choice(P, N_features, replace = False)
+        features_subset = features[:, indx]
+        responses_subset = responses[:, indx]
+
+    # split into testing and training
+    X_train, X_test, y_train, y_test = train_test_split(
+        features_subset, responses_subset, train_size=train_split_propn)
+
+    return(X_train, X_test, y_train, y_test)
+
+
+
+def consolidate_bm_iRF(features, responses, specs, \
+                seed_data_split = None, seed_classifier = None):
 
     # figure out which parameter is being looped over
     # there should only be one parameter to be looped over
     # i.e. only one element of the "specs" dictionary should be a list
-    err_1param = 0
-    for k in specs.keys():
-        if np.max(np.shape([specs[k]])) > 1:
-            print(k)
-            loop_spec = k
-            err_1param += 1
 
-    assert(err_1param <= 1) # should only be one parameter being looped over
-
-    # replicate keys
-    if err_1param == 0:
-        loop_spec = 'n_trials'
-        specs[loop_spec] = list([specs[loop_spec]]) * \
-            np.max(np.shape([specs[loop_spec]]))
-
-    n_loops = np.max(np.shape([specs[loop_spec]]))
-
-    print(specs[loop_spec])
-
-    for k in specs.keys():
-        if k != loop_spec:
-            specs[k] = list([specs[k]]) * n_loops
-    print(specs)
+    varNames = sorted(specs)
+    spec_comb = [dict(zip(varNames, prod)) \
+        for prod in itertools.product(*(specs[name] for name in varNames))]
 
     iRF_bm = {}
 
-    for i in range(n_loops):
-        # subsample data if n parameter is passed
-        N = np.shape(features)[0]
-        P = np.shape(features)[1]
-        if specs['N_obs'][i] != N:
-            indx = np.random.choice(N, specs['N_obs'], replace = False)
-            features_subset = features[indx, :]
-            responses_subset = responses[indx, :]
-        else:
-            features_subset = features
-            responses_subset = responses
+    for i in range(len(spec_comb)):
 
-        # subsample features if p parameter is passed
-        if specs['N_features'][i] != P:
-            indx = np.random.choice(P, specs['N_features'], replace = False)
-            features_subset = features[:, indx]
-            responses_subset = responses[:, indx]
-        else:
-            features_subset = features
-            responses_subset = responses
+        print(spec_comb[i])
 
-        iRF_bm[i] = iRF_benchmarks(features_subset, responses_subset,
-                        n_trials=specs['n_trials'][i],
-                           K=specs['n_iter'][i],
-                           train_split_propn=specs['train_split_propn'][i],
-                           n_estimators=specs['n_estimators'][i],
-                           B=specs['n_bootstraps'][i],
-                           propn_n_samples=specs['propn_n_samples'][i],
-                           bin_class_type=specs['bin_class_type'][i],
-                           M=specs['n_RIT'][i],
-                           max_depth=specs['max_depth'][i],
-                           noisy_split=specs['noisy_split'][i],
-                           num_splits=specs['num_splits'][i],
-                           n_estimators_bootstrap=specs['n_estimators_bootstrap'][i],
-                           seed=seed)
+        [X_train, X_test, y_train, y_test] =\
+         parse_data(features, responses, spec_comb[i]['train_split_propn'],\
+                    N_obs = 'all', N_features = 'all', seed = seed_data_split)
+
+
+        iRF_bm[i] = get_iRF_benchmarks(X_train, X_test, y_train, y_test,
+                        n_trials = spec_comb[i]['n_trials'],
+                           K = spec_comb[i]['n_iter'],
+                           n_estimators = spec_comb[i]['n_estimators'],
+                           B = spec_comb[i]['n_bootstraps'],
+                           propn_n_samples = spec_comb[i]['propn_n_samples'],
+                           bin_class_type = spec_comb[i]['bin_class_type'],
+                           M = spec_comb[i]['n_RIT'],
+                           max_depth = spec_comb[i]['max_depth'],
+                           noisy_split = spec_comb[i]['noisy_split'],
+                           num_splits = spec_comb[i]['num_splits'],
+                           n_estimators_bootstrap = spec_comb[i]['n_estimators_bootstrap'],
+                           seed_classifier = None)
     return(iRF_bm)
 
 def plot_bm(bm, specs, param, metric):
