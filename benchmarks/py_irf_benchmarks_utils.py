@@ -228,7 +228,7 @@ def get_iRF_benchmarks(X_train, X_test, y_train, y_test, n_trials=10,
     # aggregate metrics
     metrics_all = {}
 
-    for k in metrics_tmp[1].keys():
+    for k in metrics_tmp[0].keys():
         metrics_all[k] = [metrics_tmp[i][k] for i in range(n_trials)]
 
     metrics_all['time'] = iRF_time

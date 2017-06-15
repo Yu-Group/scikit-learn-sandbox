@@ -54,7 +54,7 @@ output_name = args.fname_yaml_specs + "_out.yaml"
 print(output_name)
 
 rf_bm = py_irf_benchmarks_utils.consolidate_bm_iRF(features, responses, inp_specs, \
-                seed_classifier = 23, seed_data_split = 24)
+                seed_classifier = 2001, seed_data_split = 24)
 
 py_irf_benchmarks_utils.dict_to_yaml(inp_dict=rf_bm,
                                out_yaml_dir= OUTPUT_DIR,
