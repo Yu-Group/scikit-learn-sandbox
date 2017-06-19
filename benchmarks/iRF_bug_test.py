@@ -19,6 +19,8 @@ from sklearn.model_selection import train_test_split
 
 import itertools
 
+import sys
+sys.path.append('../benchmarks/')
 import py_irf_benchmarks_utils
 
 # load features
