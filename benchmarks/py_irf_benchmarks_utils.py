@@ -126,6 +126,9 @@ def RF_benchmarks(features, responses,
             'feature_importances': feature_importances}
     return(rf_bm)
 
+# =============================================================================
+# extract the iRF benchmarks
+# =============================================================================
 
 def get_iRF_benchmarks(X_train, X_test, y_train, y_test, n_trials=10,
                    K=5,
@@ -287,16 +290,16 @@ def consolidate_bm_RF(features, responses, specs, seed = None):
         if specs['N_obs'][i] != N:
             indx = np.random.choice(N, specs['N_obs'], replace = False)
             features_subset = features[indx, :]
-            responses_subset = responses[indx, :]
+            responses_subset = responses[indx]
         else:
-            features_subset = features
-            responses_subset = responses
+            features_subset = deepcopy(features)
+            responses_subset = deepcopy(responses)
 
         # subsample features if p parameter is passed
         if specs['N_features'][i] != P:
             indx = np.random.choice(P, specs['N_features'], replace = False)
             features_subset = features[:, indx]
-            responses_subset = responses[:, indx]
+            responses_subset = responses[:]
         else:
             features_subset = features
             responses_subset = responses
@@ -326,16 +329,14 @@ def parse_data(features, responses, train_split_propn = 0.8, \
     else:
         indx = np.random.choice(N, N_obs, replace = False)
         features_subset = features[indx, :]
-        responses_subset = responses[indx, :]
+        responses_subset = responses[indx]
 
     # subsample features if p parameter is passed
     if N_features == 'all':
-        features_subset = deepcopy(features)
-        responses_subset = deepcopy(responses)
+        pass
     else:
         indx = np.random.choice(P, N_features, replace = False)
-        features_subset = features[:, indx]
-        responses_subset = responses[:, indx]
+        features_subset = features_subset[:, indx]
 
     # split into testing and training
     X_train, X_test, y_train, y_test = train_test_split(
@@ -343,6 +344,10 @@ def parse_data(features, responses, train_split_propn = 0.8, \
 
     return(X_train, X_test, y_train, y_test)
 
+
+# =============================================================================
+# consolidate the iRF benchmarks, over a number of specified specs
+# =============================================================================
 
 
 def consolidate_bm_iRF(features, responses, specs, \
