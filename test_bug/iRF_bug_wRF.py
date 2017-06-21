@@ -43,6 +43,7 @@ feature_importances = \
 
 rf = RandomForestClassifier(n_estimators=specs['n_estimators'], random_state = 409)
 rf.fit(X=X_train, y=y_train, feature_weight=feature_importances)
+# rf.fit(X=X_train, y=y_train) # try with unweighted rf -- this should work fine
 
 for idx, dtree in enumerate(rf.estimators_):
     print(idx)

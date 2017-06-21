@@ -22,32 +22,30 @@ import sys
 sys.path.append('../benchmarks')
 import py_irf_benchmarks_utils
 
-for i in range(1): # loop through all parameters
+# load features
+features = np.loadtxt('./data/breast_cancer_features.csv', delimiter=',')
+responses = np.loadtxt('./data/breast_cancer_responses.csv', delimiter=',')
 
-    # load features
-    features = np.loadtxt('./data/breast_cancer_features.csv', delimiter=',')
-    responses = np.loadtxt('./data/breast_cancer_responses.csv', delimiter=',')
+# load specs
+specs = py_irf_benchmarks_utils.yaml_to_dict(inp_yaml='./specs/iRF_mod_bug.yaml')
 
-    # load specs
-    specs = py_irf_benchmarks_utils.yaml_to_dict(inp_yaml='./specs/iRF_mod_bug.yaml')
+print(specs)
 
-    print(specs)
+X_train, X_test, y_train, y_test = train_test_split(
+    features, responses, train_size=specs['train_split_propn'], random_state = 24)
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        features, responses, train_size=specs['train_split_propn'], random_state = 24)
-
-    irf_utils.run_iRF_bug_test(X_train=X_train,
-                          X_test=X_test,
-                          y_train=y_train,
-                          y_test=y_test,
-                          K=specs['n_iter'],
-                          n_estimators=specs['n_estimators'],
-                          B=specs['n_bootstraps'],
-                          random_state_classifier=405,
-                          propn_n_samples=specs['propn_n_samples'],
-                          bin_class_type=specs['bin_class_type'],
-                          M=specs['n_RIT'],
-                          max_depth=specs['max_depth'],
-                          noisy_split=specs['noisy_split'],
-                          num_splits=specs['num_splits'],
-                          n_estimators_bootstrap=specs['n_estimators_bootstrap'])
+irf_utils.run_iRF_bug_test(X_train=X_train,
+                      X_test=X_test,
+                      y_train=y_train,
+                      y_test=y_test,
+                      K=specs['n_iter'],
+                      n_estimators=specs['n_estimators'],
+                      B=specs['n_bootstraps'],
+                      random_state_classifier=405,
+                      propn_n_samples=specs['propn_n_samples'],
+                      bin_class_type=specs['bin_class_type'],
+                      M=specs['n_RIT'],
+                      max_depth=specs['max_depth'],
+                      noisy_split=specs['noisy_split'],
+                      num_splits=specs['num_splits'],
+                      n_estimators_bootstrap=specs['n_estimators_bootstrap'])
