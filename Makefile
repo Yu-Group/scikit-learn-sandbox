@@ -4,6 +4,7 @@
 conda_all:
 	conda env create -f=./conda_envs/sklearndev0/environment.yml
 	conda env create -f=./conda_envs/sklearndev1/environment.yml
+	conda env create -f=./conda_envs/sklearndev2/environment.yml
 	conda env create -f=./conda_envs/sklearnprod0/environment.yml
 
 conda_dev0:
