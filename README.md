@@ -45,7 +45,7 @@ To **activate** the conda environments simply use conda as usual i.e. `source ac
 
 `sklearndev1` : Same as `sklearndev0` but includes pandas and jupyter notebook for additional interactive testing
 
-`sklearndev1` : Same as `sklearndev2` but includes pandas and jupyter notebook and `feather` for additional interactive testing
+`sklearndev2` : Same as `sklearndev1` but includes pandas and jupyter notebook and `feather` for additional interactive testing
 
 `sklearnprod0`: This contains the latest conda **production** `scikit-learn` build and is useful for current production testing of `sklearn`
 
