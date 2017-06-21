@@ -206,7 +206,7 @@ def get_iRF_benchmarks(X_train, X_test, y_train, y_test, n_trials=10,
                               K=K,
                               n_estimators=n_estimators,
                               B=B,
-                              random_state_classifier=seed_classifier+i,
+                              random_state_classifier=seed_classifier + i,
                               propn_n_samples=propn_n_samples,
                               bin_class_type=bin_class_type,
                               M=M,
@@ -369,7 +369,7 @@ def consolidate_bm_iRF(features, responses, specs, \
 
         [X_train, X_test, y_train, y_test] =\
          parse_data(features, responses, spec_comb[i]['train_split_propn'],\
-                    N_obs = 'all', N_features = 'all', seed = seed_data_split+i)
+                    N_obs = 'all', N_features = 'all', seed = seed_data_split + i)
 
 
         iRF_bm[i] = get_iRF_benchmarks(X_train, X_test, y_train, y_test,
@@ -384,7 +384,7 @@ def consolidate_bm_iRF(features, responses, specs, \
                            noisy_split = spec_comb[i]['noisy_split'],
                            num_splits = spec_comb[i]['num_splits'],
                            n_estimators_bootstrap = spec_comb[i]['n_estimators_bootstrap'],
-                           seed_classifier = seed_classifier)
+                           seed_classifier = seed_classifier + i)
     return(iRF_bm)
 
 def plot_bm(bm, specs, param, metric):

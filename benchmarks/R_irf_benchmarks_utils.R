@@ -5,6 +5,8 @@ library(doMC)
 n.cores <- 3
 registerDoMC(n.cores)
 
+library(plotrix)
+
 
 get_RF_benchmarks <- function(features, responses,
                           n_trials=10,
@@ -195,4 +197,21 @@ parse_data <-function(features, responses, train_split_propn = 0.8,
 
   return(list(
     X_train = X_train, X_test = X_test, y_train = y_train, y_test = y_test))
+  }
+
+library(repr)
+
+plot_bm <- function(irf_bm, specs, param, metric){
+      x <- specs[[param]]
+      y <- rep(0,length(x))
+      sd <- rep(0,length(x))
+
+      for(i in 1:length(y)){
+          y[i] <- irf_bm[[i]][['metrics_summary']][[metric]][1]
+          sd[i] <- irf_bm[[i]][['metrics_summary']][[metric]][2]
+      }
+
+      # Change plot size to 4 x 3
+      options(repr.plot.width=4, repr.plot.height=4)
+      plotCI(x, y, sd, ylab = metric, xlab = param)
   }
