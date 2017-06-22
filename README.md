@@ -62,10 +62,10 @@ We can use the following workflow for our `pull-commit-review-merge` cycle:
 5. Check the remotes: `git remote -v`. You should see:
 
 ```bash
-origin	git@github.com:**your-username-here**/scikit-learn-sandbox.git (fetch)
-origin	git@github.com:**your-username-here**/scikit-learn-sandbox.git (push)
-upstream	git@github.com:Yu-Group/scikit-learn-sandbox.git (fetch)
-upstream	git@github.com:Yu-Group/scikit-learn-sandbox.git (push)
+origin  https://github.com/your-user-name/scikit-learn-sandbox (fetch)
+origin  https://github.com/your-user-name/scikit-learn-sandbox (push)
+upstream        https://github.com/Yu-Group/scikit-learn-sandbox (fetch)
+upstream        https://github.com/Yu-Group/scikit-learn-sandbox (push)
 ```
 
 ### Git-Github - Typical Workflow
