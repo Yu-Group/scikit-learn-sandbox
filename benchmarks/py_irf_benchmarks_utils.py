@@ -174,6 +174,7 @@ def get_iRF_benchmarks(X_train, X_test, y_train, y_test, n_trials=10,
 
     for i in range(n_trials):
         # run iRF and time
+        print('trial', i)
         t0 = time.time()
 
         """        assert np.shape(X_train)[0] == np.shape(y_train)[0]
@@ -364,7 +365,7 @@ def consolidate_bm_iRF(features, responses, specs, \
     iRF_bm = {}
 
     for i in range(len(spec_comb)):
-
+        
         print(spec_comb[i])
 
         [X_train, X_test, y_train, y_test] =\
